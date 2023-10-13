@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.contents.contentsmanage.NoticeDao">
+		
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.contents.Notice
+		@result 
+		@author 김재형
+		@since 20.11.03
+		@description 공지사항 조회 - get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.contents.contentsmanage.Notice">
+		SELECT 	A.idx AS scrapIdx
+		,		A.bidx AS bIdx
+		, 		B.strSubject AS strSubject
+		, 		convert(varchar(16), B.dateRegdate, 120) AS dateRegdate
+		, 		B.intRead AS intRead 
+		, 		bitDelete
+		FROM [dbo].[BZBoard_Scrap_v2] AS A
+		LEFT OUTER JOIN [dbo].[BZBoard_v2] AS B
+		ON A.bidx = B.idx
+		WHERE [intBoardID] = 9
+		ORDER BY B.idx desc
+	</select>
+	
+	<!-- ================================
+	@name setNotice
+	@param com.cms.dto.contents.Notice
+	@result 
+	@author 김재형
+	@since 20.11.04
+	@description 공지사항 등록  BZBoard_v2
+	==================================== -->
+	<insert id="setNotice" parameterType="com.cms.dto.contents.contentsmanage.Notice">
+		INSERT INTO BZBoard_v2 ( 
+					intComment,  
+					intFileCount,  
+					bitDelete,  
+					intRead,
+					dateRegdate,
+					strSubject,  
+					strPreContent,  
+					bitDirPre,  
+					strContent,  
+					strMContent,  
+					intMHtml,  
+					strMImage,  
+					strBZCode, 
+					mainYN,  
+					mainTitle,  
+					branchOpen  
+					) VALUES (  
+					 0,  
+					 0, 
+					 #{bitDelete} ,
+					 0,  
+					 CONVERT(date, #{dateRegdate} ) ,
+					 #{strSubject} ,  
+					 '',   
+					 0,  
+					 #{strContent} ,    
+					 '',  
+					 1, 
+					 '',
+					 '',
+					 'N',
+					 '',
+					 #{branchOpen}  				
+					) 
+		<selectKey keyProperty="bidx" resultType="int" order="AFTER">
+			SELECT IDENT_CURRENT('BZBoard_v2') AS bidx
+		</selectKey>
+	</insert>
+	
+	<!-- ================================
+	@name setNoticeScrap
+	@param int
+	@result 
+	@author 김재형
+	@since 20.11.05
+	@description 공지사항 등록   [BZBoard_Scrap_v2]
+	==================================== -->
+	<insert id="setNoticeScrap" parameterType="int" >
+		INSERT INTO [BZBoard_Scrap_v2] ( 
+					intBoardID,  
+					bidx  
+					) VALUES (  
+					 9,  
+					 #{bidx}
+					) 
+	</insert>
+	
+	<!-- ================================
+		@name getNotice
+		@param idx
+		@result 
+		@author 김재형
+		@since 20.11.05
+		@description 공지사항 상세 조회 페이지 - get Notice  
+	==================================== -->
+	<select id="getNotice" parameterType="int"  resultType="com.cms.dto.contents.contentsmanage.Notice">
+		SELECT 	idx AS bidx
+		, 		BranchOpen as branchOpen
+		,		strSubject
+		,		strContent
+		, 		convert(varchar(16), dateRegdate, 120) AS dateRegdate
+		, 		intRead
+		, 		bitDelete
+		FROM BZBoard_v2
+		WHERE idx = #{idx}
+	</select>	
+	
+	<!-- ================================
+	@name removeNotice
+	@param idx
+	@author 김재형
+	@since 20.11.09
+	@description 공지사항 삭제
+	==================================== -->
+	<delete id="removeNotice" parameterType="int" >
+		DELETE FROM BZBoard_v2
+		WHERE idx = #{idx}
+	</delete>
+	
+	<!-- ================================
+	@name removeNotice
+	@param idx
+	@author 김재형
+	@since 20.11.09.
+	@description 공지사항 Scrap 삭제
+	==================================== -->
+	<delete id="removeNoticeScrap" parameterType="int" >
+		DELETE FROM [BZBoard_Scrap_v2]
+		WHERE bidx = #{idx}
+	</delete>
+	
+	<!-- ================================
+	@name modifyNotice
+	@param com.cms.dto.contents.Notice
+	@result 
+	@author 김재형
+	@since 20.11.09.
+	@description 공지사항  수정
+	==================================== -->
+	<update id="modifyNotice" parameterType="com.cms.dto.contents.contentsmanage.Notice">
+		UPDATE BZBoard_v2
+		SET	bitDelete = #{bitDelete}
+		,		branchOpen = #{branchOpen}
+		,		strSubject = #{strSubject}
+		,		strContent = #{strContent}
+		,		dateRegdate = CONVERT(date, #{dateRegdate} )
+		WHERE idx = #{bidx}
+	</update>
+	
+</mapper>

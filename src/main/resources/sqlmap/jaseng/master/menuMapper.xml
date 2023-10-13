@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.master.MenuDao">
+	
+	<!-- ================================
+		@name getMenuAllDepth1
+		@param 
+		@result com.cms.dto.menu.Menu
+		@author JB
+		@since 20.09.21
+		@description select Menu 1 Depth  
+	==================================== -->
+	<select id="getMenuAllDepth1" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+		FROM [Menu_Manage]
+		WHERE Depth = 1
+		ORDER BY Sort asc
+	</select>
+	
+	<!-- ================================
+		@name getMenuDepth2
+		@param 
+		@result com.cms.dto.menu.Menu
+		@author JB
+		@since 20.09.28
+		@description select Menu 2 Depth  
+	==================================== -->
+	<select id="getMenuDepth2" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+		FROM [Menu_Manage]
+		WHERE Depth = 2
+		ORDER BY Sort asc
+	</select>
+	
+	<!-- ================================
+		@name getMenuChildren
+		@param int
+		@result com.cms.dto.menu.Menu
+		@author JB
+		@since 20.09.22
+		@description select Menu Child Depth  
+	==================================== -->
+	<select id="getMenuChildren" parameterType="int" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+			,	(SELECT Name from Menu_Manage where IDX = #{idx}) as parentName
+		FROM Menu_Manage
+		WHERE  Parent_IDX = #{idx}
+		ORDER BY Sort asc
+	</select>
+
+	<!-- ================================
+		@name getMenuChildrenChoice
+		@param vo map
+		@result com.cms.dto.menu.Menu
+		@author JB
+		@since 20.10.07
+		@modify 21.04.20
+		@description select Menu Child Depth  
+	==================================== -->
+	<select id="getMenuChildrenChoice" parameterType="map" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+			,	(SELECT Name from Menu_Manage where IDX = #{menu.idx}) as parentName
+			<if test="menu.reqUrl != null">
+  				,	(CASE WHEN URL = #{menu.reqUrl} THEN 'active' ELSE '' END ) as addClass 	
+			</if>
+		FROM Menu_Manage
+		WHERE Use_YN = 'Y' AND Parent_IDX = #{menu.idx}
+		<if test='!admin.auth.equals("master")'>
+			<choose>
+				<when test="menu.depth == 1">
+					AND IDX IN ( SELECT DISTINCT Parent_IDX FROM Menu_Manage WHERE IDX in
+					<foreach collection="admin.authList" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+					)
+				</when>
+				<when test="menu.depth == 2">
+					AND IDX IN
+					<foreach collection="admin.authList" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</when>
+				<otherwise></otherwise>
+			</choose>
+		</if>
+		ORDER BY Sort asc
+	</select>
+	
+	<!-- ================================
+		@name getMenuCurrentDepth1
+		@param 
+		@result com.cms.dto.menu.Menu
+		@author JB
+		@since 20.09.24
+		@description select Menu Current Depth 1  
+	==================================== -->
+	<select id="getMenuCurrentDepth1" parameterType="String" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+		FROM Menu_Manage
+		WHERE Depth = 1 and URL LIKE '%' + #{url} + '%'
+	</select>
+	
+	<!-- ================================
+		@name setMenu
+		@param com.cms.dto.master.Menu
+		@author JB
+		@since 20.10.12
+		@description insert Menu Data  
+	==================================== -->
+	<insert id="setMenu" parameterType="com.cms.dto.master.Menu">
+		INSERT INTO Menu_Manage (
+				Parent_IDX
+			,	Name
+			,	Depth
+			,	URL
+			,	Sort
+			,	Use_YN
+			,	Reg_ID
+			,	Reg_Date
+		) VALUES (
+				#{parentIdx}
+			,	#{name}
+			,	#{depth}
+			,	#{url}
+			,	#{sort}
+			,	#{useYN}
+			,	#{regId}
+			,	GETDATE()
+		)
+	</insert>
+	
+	<!-- ================================
+		@name removeMenu
+		@param com.cms.dto.master.Menu
+		@author JB
+		@since 20.10.13
+		@description remove Menu Data  
+	==================================== -->
+	<delete id="removeMenu" parameterType="com.cms.dto.master.Menu">
+		DELETE FROM Menu_Manage
+		WHERE IDX = #{idx}
+	</delete>
+	
+	<!-- ================================
+		@name getCurrentMenu
+		@param int
+		@result com.cms.dto.master.Menu
+		@author JB
+		@since 20.10.13
+		@description remove Menu Data  
+	==================================== -->
+	<select id="getCurrentMenu" parameterType="int" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+		FROM Menu_Manage
+		WHERE IDX = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyMenu
+		@param  com.cms.dto.master.Menu
+		@author JB
+		@since 20.10.13
+		@description modify Menu Data  
+	==================================== -->
+	<update id="modifyMenu" parameterType="com.cms.dto.master.Menu">
+		UPDATE Menu_Manage
+		SET 	Name = #{name}
+			,	URL = #{url}
+			,	Sort = #{sort}
+			,	Use_YN = #{useYN}
+			,	Mod_ID = #{modId}
+			,	Mod_Date = GETDATE()
+		WHERE IDX = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name getParentMenuAuthList
+		@param String
+		@return com.cms.dto.master.Menu
+		@author JB
+		@since 21.04.13
+		@description get ParentMenu Auth List  
+	==================================== -->
+	<select id="getParentMenuAuthList" parameterType="String" resultType="com.cms.dto.master.Menu">
+		SELECT 	IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+		FROM [Menu_Manage]
+		WHERE IDX in (
+				SELECT DISTINCT Parent_IDX
+				FROM [Menu_Manage] MM
+					LEFT JOIN [Admin_MenuAuth] AM ON AM.Menu_IDX = MM.IDX
+				WHERE AM.ID = #{id}
+		)
+	</select>
+	
+	<!-- ================================
+		@name getMenuAuthDepth1
+		@param List
+		@return com.cms.dto.master.Menu
+		@author JB
+		@since 21.04.13
+		@modify 21.04.21
+		@description get Menu Auth Depth1  
+	==================================== -->
+	<select id="getMenuAuthDepth1" resultType="com.cms.dto.master.Menu">
+		SELECT IDX as idx
+			,	Parent_IDX as parentIdx
+			,	Name as name
+			,	Depth as depth
+			,	URL as url
+			,	Sort as sort
+			,	Use_YN as useYN
+		FROM [Menu_Manage]
+		WHERE IDX IN
+			<choose>
+				<when test="list != null and list.size > 0">
+					<foreach collection="list" item="item" open="(" close=")" separator=",">
+						#{item.parentIdx}
+					</foreach>
+				</when>
+				<otherwise>
+					(0)
+				</otherwise>
+			</choose>
+	</select>
+	
+</mapper>

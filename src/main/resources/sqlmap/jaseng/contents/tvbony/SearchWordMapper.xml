@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+		
+<mapper namespace="com.cms.dao.contents.tvbony.SearchWordDao">
+
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.contents.tvbony.SearchWord
+		@result 
+		@author 김재형
+		@since 21.06.29
+		@description  조회 - get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.contents.tvbony.SearchWord">
+		SELECT keyword
+		, COUNT(keyword) AS cnt
+		FROM JASENG_TV_SEARCHLOG 
+		WHERE CONVERT(VARCHAR(10), REGDATE, 23) BETWEEN   #{startDate} AND #{endDate} 
+		GROUP BY KEYWORD 
+		ORDER BY cnt DESC
+	</select>
+	
+</mapper>
+		

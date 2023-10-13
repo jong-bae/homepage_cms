@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.effect.CsLetterDao">
+
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.contents.effect.CsLetter
+		@result 
+		@author 김재형
+		@since 21.04.13
+		@description 이벤트 관리 조회 - get List  
+	==================================== -->
+	<select id="getList" parameterType="com.cms.dto.contents.effect.CsLetter" resultType="com.cms.dto.contents.effect.CsLetter">
+
+		SELECT
+			idx,
+			subject,
+			writer_id,
+			writer_name,
+			gubun,
+			cd_bcode,
+			dbo.fnBname(cd_bcode) as bcode_name,
+			doctor_idx,
+			doctor_name,
+			content,
+			cnt,
+			convert(varchar, regdate, 112) as regdate,
+			convert(varchar, moddate, 112) as moddate,
+			mobile_yn,
+			best_yn,
+			use_status,
+			use_yn,
+			ip, 
+			( SELECT ( case when count(idx) > 0 then 'Y' else 'N' end ) as suggest_yn FROM BZContactMail WHERE GubunTb = 'BZBoard' and GubunIdx = TreatmentReview.idx ) as suggest_yn,
+			( select count(*) from BZComment where tblidx = TreatmentReview.idx ) as comment_cnt 
+		FROM TreatmentReview
+		WHERE 1=1
+		<if test="!gubun.equals('') and gubun!=null">
+			AND gubun = #{gubun}
+		</if>
+		<if test="!cdBCODE.equals('-1') and cdBCODE!=null">
+			AND cd_bcode = #{cdBCODE}
+		</if>
+		AND CONVERT(varchar(10), regdate, 23) between #{startDate} AND #{endDate}
+		ORDER BY idx DESC
+		
+	</select>
+	
+	<!-- ================================
+		@name getWaitList
+		@param com.cms.dto.contents.effect.CsLetter
+		@result 
+		@author 김재형
+		@since 21.04.29
+		@description 이벤트 관리 조회 - getWaitList  
+	==================================== -->
+	<select id="getWaitList"  parameterType="list" resultType="com.cms.dto.contents.effect.CsLetter">
+		SELECT 
+			idx, 
+			subject, 
+			writer_id, 
+			writer_name, 
+			gubun, 
+			cd_bcode, 
+			dbo.fnBname(cd_bcode) as bcode_name, 
+			doctor_idx, 
+			doctor_name, 
+			content, 
+			cnt, 
+			convert(varchar, regdate, 112) as regdate, 
+			convert(varchar, moddate, 112) as moddate, 
+			mobile_yn, 
+			best_yn, 
+			use_status,
+			use_yn,
+			( SELECT count(idx) FROM BZContactMail WHERE GubunTb = 'BZBoard' and GubunIdx = TreatmentReview.idx ) as suggest_yn
+		FROM TreatmentReview 
+		WHERE use_status = '대기'
+		ORDER BY idx DESC
+	</select>
+		
+	<!-- ================================
+		@name getCsLetter
+		@param idx
+		@result 
+		@author 김재형
+		@since 21.05.06
+		@description 치료 수기 조회
+	==================================== -->
+	<select id="getCsLetter" parameterType="int"  resultType="com.cms.dto.contents.effect.CsLetter">
+		SELECT 
+			idx,
+			subject,
+			writer_id,
+			writer_name,
+			gubun,
+			cd_bcode,
+			dbo.fnBname(cd_bcode) as bcode_name,
+			doctor_idx,
+			doctor_name,
+			content,
+			cnt,
+			convert(varchar, regdate, 112) as regdate,
+			convert(varchar, moddate, 112) as moddate,
+			mobile_yn,
+			best_yn,
+			use_status,
+			use_yn,
+			ip,
+			( select count(*) from BZComment where tblidx = TreatmentReview.idx ) as comment_cnt
+		 FROM TreatmentReview
+		 WHERE idx = #{idx}
+	</select>	
+	
+	<!-- ================================
+		@name modifyCsLetterByBoard
+		@param com.cms.dto.contents.effect.CsLetter
+		@result 
+		@author 김재형
+		@since 21.05.06
+		@description Board Table Update
+	==================================== -->
+	<update id="modifyCsLetterByBoard" parameterType="com.cms.dto.contents.effect.CsLetter">
+		UPDATE TreatmentReview
+		SET 	content = #{content}
+			,	subject = #{subject}
+			,	writer_name = #{writer_name}
+			,	gubun = #{gubun}
+			,	use_yn = #{use_yn}
+			,	use_status = #{use_status}
+			,	best_yn = #{best_yn}
+			, 	moddate = getdate()
+		 WHERE idx = #{idx}
+	</update>
+	
+	
+	<!-- ================================
+	@name modifyCsLetterBySelfThankYou
+	@param com.cms.dto.contents.effect.CsLetter
+	@result 
+	@author 김재형
+	@since 21.05.07
+	@description SelfThankYou Table Update
+	==================================== -->
+	<update id="modifyCsLetterBySelfThankYou" parameterType="com.cms.dto.contents.effect.CsLetter">
+		UPDATE [dbo].[SELF_THANKYOU]
+		SET 	subject = #{strSubject}
+			,	writer_name = #{strName}
+			,	gubun = #{searchType}
+		WHERE gubun = #{searchType} AND intThread = #{intThread} AND intIndex = #{intIndex}
+	</update>
+	
+		<!-- ================================
+		@name 건의합니다 체크
+		@param idx
+		@result 
+		@author 김재형
+		@since 21.05.06
+		@description 치료 수기 조회
+	==================================== -->
+	<select id="countBZContactMail" parameterType="int"  resultType="int">
+		SELECT count(idx) AS CNT
+		FROM [dbo].[BZContactMail] 
+		WHERE GubunTb = 'BZBoard' AND GubunIdx = #{idx}
+	</select>	
+	
+	<insert id="suggestCsLetter" parameterType="com.cms.dto.contents.effect.CsLetter">
+		INSERT INTO [dbo].[BZContactMail] (
+			KindCode,  
+			Kind,  
+			Stat,  
+			Title,  
+			Content,  				
+			Email,  
+			Tel1,  
+			BCODE,  
+			Name,  
+			GubunTb,  
+			GubunIdx  
+		) VALUES (
+			'CD_CNCT_01',
+			'C',  
+			'N',  
+			'[자필후기]'+#{subject},
+			#{content},
+			#{writer_id},
+			'',
+			#{cd_bcode},
+			#{writer_name},
+			'BZBoard',  
+			#{idx}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getReplyList
+		@param com.cms.dto.contents.effect.CsComment
+		@result 
+		@author 김재형
+		@since 21.05.11
+		@description 
+	==================================== -->
+	<select id="getReplyList" parameterType="com.cms.dto.contents.effect.CsComment" resultType="com.cms.dto.contents.effect.CsComment">
+
+		SELECT
+		idx,
+		comment,
+		name,
+		( select gubun from TreatmentReview where idx = BZComment.tblIdx ) as gubun,
+		( select subject from TreatmentReview where idx = BZComment.tblIdx ) as subject,
+		regDate,
+		useYN
+		FROM BZComment
+		WHERE 1=1 and tblIdx = #{idx}
+		ORDER BY idx DESC
+
+	</select>
+
+	<!-- ================================
+		@name getReplyWaitList
+		@param com.cms.dto.contents.effect.CsComment
+		@result 
+		@author 김재형
+		@since 21.05.13
+		@description 
+	==================================== -->
+	<select id="getReplyWaitList"  resultType="com.cms.dto.contents.effect.CsComment">
+
+		SELECT
+		idx,
+		comment,
+		name,
+		( select gubun from TreatmentReview where idx = BZComment.tblIdx ) as gubun,
+		( select subject from TreatmentReview where idx = BZComment.tblIdx ) as subject,
+			regDate,
+			useYN
+		FROM BZComment
+		WHERE 1=1 and useYn = 'N'
+		ORDER BY idx DESC
+		
+	</select>
+	
+	<!-- ================================
+		@name getReplyAjaxList
+		@param com.cms.dto.contents.effect.CsComment
+		@result 
+		@author 김재형
+		@since 21.05.13
+		@description 
+	==================================== -->
+	<select id="getReplyAjaxList" parameterType="com.cms.dto.contents.effect.CsComment" resultType="com.cms.dto.contents.effect.CsComment">
+
+		SELECT
+			idx,
+			comment,
+			name,
+			( select gubun from TreatmentReview where idx = BZComment.tblIdx ) as gubun,
+			( select subject from TreatmentReview where idx = BZComment.tblIdx ) as subject,
+			regDate,
+			useYN
+		FROM BZComment
+		WHERE 1=1 and useYn = 'Y'
+		<if test="!cdBCODE.equals('-1') and cdBCODE!=null">
+			AND tblIdx in ( SELECT idx FROM TreatmentReview WHERE cd_bcode = #{cdBCODE} )
+		</if>
+		<if test="!gubun.equals('') and gubun!=null">
+			AND tblIdx in ( SELECT idx FROM TreatmentReview WHERE gubun = #{gubun} )
+		</if>
+		ORDER BY idx DESC
+		
+	</select>
+	
+	<!-- 
+		@name getCsComment
+		@param com.cms.dto.contents.effect.CsComment
+		@result 
+		@author 김재형
+		@since 21.05.14
+		@description 코멘트 조회
+	 -->
+	<select id="getCsComment" parameterType="int" resultType="com.cms.dto.contents.effect.CsComment">
+
+		SELECT
+			idx,
+			comment,
+			name,
+			( select gubun from TreatmentReview where idx = BZComment.tblIdx ) as gubun,
+			( select subject from TreatmentReview where idx = BZComment.tblIdx ) as subject,
+			regDate,
+			useYN
+		FROM BZComment
+		WHERE idx  = #{idx}
+		ORDER BY idx DESC
+
+	</select>
+		
+	<!-- ================================
+	@name modifyCsComment
+	@param com.cms.dto.contents.effect.CsComment
+	@result 
+	@author 김재형
+	@since 21.05.14
+	@description modifyCsComment
+	==================================== -->
+	<update id="modifyCsComment" parameterType="com.cms.dto.contents.effect.CsComment">
+		UPDATE [dbo].[BZComment]
+		SET 	useYN = #{useYN}
+		WHERE 	idx = #{idx}
+	</update>
+
+</mapper>

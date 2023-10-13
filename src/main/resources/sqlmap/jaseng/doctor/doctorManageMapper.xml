@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.doctor.DoctorDao">
+
+	<!-- ================================
+		@name getDoctorAllList
+		@param 
+		@result com.cms.dto.doctor.Doctor
+		@author JB
+		@since 21.02.10
+		@description get Doctor List  
+	==================================== -->
+	<select id="getDoctorAllList" resultType="com.cms.dto.doctor.Doctor">
+		SELECT	idx as didx
+			,	Name as name
+			,	CaargeClinicExp as clinicExp
+			,	replace(convert(nvarchar(4000),[PartSubName2]), char(13)+char(10), '&lt;br&gt;') as partSubName2
+			,	ImgFile as imgFile
+			,	idno
+			,	newidno
+			,	UseYN as useYN
+			,	detailYN
+			,	scheduleYN
+			,	reserveYN
+			,	Thesis
+		FROM [BZDoctor]
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name setDoctor
+		@param com.cms.dto.doctor.Doctor
+		@result 
+		@author JB
+		@since 21.02.18
+		@description set Doctor
+	==================================== -->
+	<insert id="setDoctor" parameterType="com.cms.dto.doctor.Doctor">
+		INSERT INTO BZDoctor (
+				Name
+			,	Name_e
+			,	Name_j
+			,	Name_mn
+			,	Name_ru
+			,	Name_ae
+			,	idno
+			,	newidno
+			,	UseYN
+			,	detailYN
+			,	scheduleYN
+			,	reserveYN
+			,	globalYn
+			,	PartSubName
+			,	PartSubName2
+			,	CaargeClinicExp
+			,	ImgFile
+			,	ImgFileXL
+			,	bgFile
+			,	mbgFile
+			,	Thesis
+		) VALUES (
+				#{name}
+			,	#{name_e}
+			,	#{name_j}
+			,	#{name_mn}
+			,	#{name_ru}
+			,	#{name_ae}
+			,	#{idno}
+			,	#{newidno}
+			,	#{useYN}
+			,	#{detailYN}
+			,	#{scheduleYN}
+			,	#{reserveYN}
+			,	#{globalYN}
+			,	#{partSubName}
+			,	#{partSubName2}
+			,	#{clinicExp}
+			,	#{imgFile}
+			,	#{imgFileXL}
+			,	#{bgFile}
+			,	#{mbgFile}
+			,	#{thesis}
+		)
+		<selectKey keyProperty="didx" resultType="int" order="AFTER">
+			SELECT IDENT_CURRENT('BZDoctor') AS didx
+		</selectKey>
+	</insert>
+	
+	<!-- ================================
+		@name getDoctor
+		@param int
+		@result com.cms.dto.doctor.Doctor
+		@author JB
+		@since 21.02.18
+		@description get Doctor
+	==================================== -->
+	<select id="getDoctor" parameterType="int" resultType="com.cms.dto.doctor.Doctor">
+		SELECT	Name as name
+			,	Name_e	as name_e
+			,	Name_j	as name_j
+			,	Name_ru	as name_ru
+			,	Name_mn	as name_mn
+			,	Name_ae	as name_ae
+			,	idno
+			,	newidno
+			,	UseYN as useYN
+			,	detailYN
+			,	scheduleYN
+			,	reserveYN
+			,	globalYn as globalYN
+			,	PartSubName as partSubName
+			, 	PartSubName2 as partSubName2
+			,	CaargeClinicExp	as clinicExp
+			,	ImgFile	as imgFile_origin
+			,	ImgFileXL as imgFileXL_origin
+			,	bgFile as bgFile_origin
+			,	mbgFile as mbgFile_origin
+			,	idx as didx
+			,	Thesis
+		FROM BZDoctor
+		WHERE idx = #{didx}
+	</select>
+	
+	<!-- ================================
+		@name modifyDoctor
+		@param com.cms.dto.doctor.Doctor
+		@result 
+		@author JB
+		@since 21.02.19
+		@description modify Doctor
+	==================================== -->
+	<update id="modifyDoctor" parameterType="com.cms.dto.doctor.Doctor">
+		UPDATE BZDoctor
+		SET 	Name = #{name}
+			,	Name_e	= #{name_e}
+			,	Name_j	= #{name_j}
+			,	Name_ru	= #{name_ru}
+			,	Name_mn	= #{name_mn}
+			,	Name_ae	= #{name_ae}
+			,	idno = #{idno}
+			,	newidno = #{newidno}
+			,	UseYN = #{useYN}
+			,	detailYN = #{detailYN}
+			,	scheduleYN =  #{scheduleYN}
+			,	reserveYN =  #{reserveYN}
+			,	globalYn = #{globalYN}
+			,	PartSubName = #{partSubName}
+			, 	PartSubName2 = #{partSubName2}
+			,	CaargeClinicExp	= #{clinicExp}
+			,	ImgFile	= #{imgFile}
+			,	ImgFileXL = #{imgFileXL}
+			,	bgFile = #{bgFile}
+			,	mbgFile = #{mbgFile}
+			,	Thesis = #{thesis}
+		WHERE idx = #{didx}
+	</update>
+	
+	<!-- ================================
+		@name taSwap
+		@param didx
+		@result 
+		@author JB
+		@since 21.02.22
+		@description ta swap
+	==================================== -->
+	<update id="taSwap" parameterType="int">
+		UPDATE BZDoctor
+		SET ImgFile = '/Upload/Doctor/' + idno + '.png'
+		WHERE idx = #{didx}
+	</update>
+	
+	<!-- ================================
+		@name resiSwap
+		@param didx
+		@result 
+		@author JB
+		@since 21.02.22
+		@description resident swap
+	==================================== -->
+	<update id="resiSwap" parameterType="int">
+		UPDATE BZDoctor
+		SET ImgFile = imgFile_tmp
+		WHERE idx = #{didx}
+	</update>
+</mapper>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.homepage.MainpageTopDao">
+
+	<!-- ================================
+		@name getMainpageList
+		@param 
+		@result com.cms.dto.homepage.MainpageBanner
+		@author JB
+		@since 20.11.17
+		@description get Main Top Banner All List  
+	==================================== -->
+	<select id="getMainpageList" resultType="com.cms.dto.homepage.MainpageBanner">
+		SELECT 	idx
+			,	BCodeList as bCodeList
+			,	Description as description
+			,	USE_YN as useYN
+			,	CONVERT(varchar(10), Start_Date, 121) as startDate
+			,	CONVERT(varchar(10), End_Date, 121) as endDate
+			,	Reg_Date as regDate
+			,	[Order] as [order]
+		FROM Mainpage_Top_M
+		ORDER BY idx DESC	
+	</select>
+	
+	<!-- ================================
+		@name setMainpageTopMobile
+		@param com.cms.dto.homepage.MainpageBanner
+		@result 
+		@author JB
+		@since 20.11.18
+		@description set Main Top Banner 
+	==================================== -->
+	<insert id="setMainpageTopMobile" parameterType="com.cms.dto.homepage.MainpageBanner">
+		INSERT INTO Mainpage_Top_M (
+				BCodeList
+			,	Exposure
+			,	Banner_Img_PC	
+			,	Banner_Img
+			,	Title_Top
+			,	Title_Main
+			,	Description
+			,	URL
+			,	URL_Option
+			,	USE_YN
+			,	[Order]
+			,	Start_Date
+			,	End_Date
+			,	Reg_Date
+			,	Reg_ID
+		)
+		VALUES (
+				#{bCodeList}
+			,	#{Exposure}
+			,	#{bannerImgPc}
+			,	#{bannerImg}
+			,	#{titleTop}
+			,	#{titleMain}
+			,	#{description}
+			,	#{url}
+			,	#{url_Option}
+			,	#{useYN}
+			,	#{order}
+			,	CONVERT(DATETIME, #{startDate})
+			<choose>
+				<when test="endDate == ''">
+					,	NULL
+				</when>
+				<otherwise>
+					,	CONVERT(DATETIME, #{endDate})
+				</otherwise>
+			</choose>
+			,	GETDATE()
+			,	#{regID}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getMainpage_mobile
+		@param int
+		@result com.cms.dto.homepage.MainpageBanner
+		@author JB
+		@since 20.11.26
+		@description get Main Top Banner mobile 
+	==================================== -->
+	<select id="getMainpage_mobile" parameterType="int" resultType="com.cms.dto.homepage.MainpageBanner">
+		SELECT idx
+			,	BCodeList as bCodeList
+			,	Exposure as exposure
+			,	Banner_Img_PC as bannerImg_origin_pc
+			,	Banner_Img as bannerImg_origin
+			,	Title_Top as titleTop
+			,	Title_Main as titleMain
+			,	Description as description
+			,	URL	as url
+			,	URL_Option as url_Option
+			,	USE_YN	as useYN
+			,	[Order] as [order]
+			,	CONVERT(varchar(10), Start_Date, 121) as startDate
+			,	CONVERT(varchar(10), End_Date, 121) as endDate
+		FROM Mainpage_Top_M
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyMainpageBanner_mobile
+		@param com.cms.dto.homepage.MainpageBanner
+		@result 
+		@author JB
+		@since 20.11.26
+		@description modify Main Top Banner mobile 
+	==================================== -->
+	<update id="modifyMainpageBanner_mobile" parameterType="com.cms.dto.homepage.MainpageBanner">
+		UPDATE Mainpage_Top_M
+		SET		BCodeList = #{bCodeList}
+			,	Exposure = #{exposure}
+			,	Banner_Img_PC = #{bannerImgPc}
+			,	Banner_Img = #{bannerImg}
+			,	Title_Top = #{titleTop}
+			,	Title_Main = #{titleMain}
+			,	Description = #{description}
+			,	URL = #{url}
+			,	URL_Option = #{url_Option}
+			,	USE_YN = #{useYN}
+			,	[Order] = #{order}
+			,	Start_Date = CONVERT(DATETIME, #{startDate})
+			<choose>
+				<when test="endDate == ''">
+					,	End_Date = NULL
+				</when>
+				<otherwise>
+					,	End_Date = CONVERT(DATETIME, #{endDate})
+				</otherwise>
+			</choose>
+			,	Mod_Date = GETDATE()
+			,	Mod_ID = #{modID}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name removeMainpageBanner_mobile
+		@param int
+		@result 
+		@author JB
+		@since 20.12.21
+		@description remove Main Top Banner mobile 
+	==================================== -->
+	<delete id="removeMainpageBanner_mobile" parameterType="int">
+		DELETE FROM Mainpage_Top_M
+		WHERE idx = #{idx}
+	</delete>
+</mapper>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.BookDao">
+
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.common.BZBoard
+		@result 
+		@author 김재형
+		@since 21.06.
+		@description  조회 - get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.common.BZBoard">
+		SELECT a.idx AS idx
+		, a.bitDelete AS bitDelete
+		, a.intRead AS intRead
+		, a.dateRegdate AS dateRegdate
+		, a.strSubject AS strSubject
+		, a.strPreContent AS strPreContent
+		, a.strFirstImg AS strFirstImg
+		FROM BZBoard_v2 a left join BZBoard_Scrap_v2 b on a.idx=b.bidx 
+		WHERE a.idx NOT IN ( SELECT TOP 0 c.idx FROM BZBoard_v2 c, BZBoard_Scrap_v2 d WHERE c.idx = d.bidx AND d.intBoardID = 69 ORDER BY c.idx DESC ) AND b.intBoardID = 69 
+		ORDER BY a.idx  DESC
+	</select>
+	
+	<!-- ================================
+	@name setBook
+	@param com.cms.dto.common.BZBoard
+	@result 
+	@author 김재형
+	@since 21.06.15
+	@description  도서  등록  BZBoard_v2
+	==================================== -->
+	<insert id="setBook" parameterType="com.cms.dto.common.BZBoard">
+		INSERT INTO BZBoard_v2 ( 
+					intComment,  
+					intFileCount,  
+					bitDelete,  
+					intRead,
+					dateRegdate,
+					  
+					strSubject,  
+					strPreContent,  
+					bitDirPre,  
+					strContent,  
+					strFirstImg,
+					strMContent,  
+					intCmtCnt,
+					intMHtml,  
+					
+					strMImage,  
+					strBZCode, 
+					
+					mainYN,  
+					mainTitle,  
+					branchOpen  
+					) VALUES (  
+					 0,  
+					 0, 
+					 #{bitDelete} ,
+					 0,  
+					 GETDATE(),
+					 #{strSubject} ,  
+					 #{strPreContent} ,   
+					 0,  
+					 #{strContent} ,
+					 #{strFirstImg} ,    
+					 '',  
+					 0,
+					 1, 
+					 '',
+					 '',
+					 'N',
+					 '',
+					 ''				
+					) 
+		<selectKey keyProperty="idx" resultType="int" order="AFTER">
+			SELECT IDENT_CURRENT('BZBoard_v2') AS idx
+		</selectKey>
+	</insert>
+	
+	<!-- ================================
+	@name setBookScarp
+	@param int
+	@result 
+	@author 김재형
+	@since 221.06.15
+	@description  도서관리 등록   [BZBoard_Scrap_v2]
+	==================================== -->
+	<insert id="setBookScarp" parameterType="int" >
+		INSERT INTO [BZBoard_Scrap_v2] ( 
+					intBoardID,  
+					bidx  
+					) VALUES (  
+					 69,  
+					 #{idx}
+					) 
+	</insert>
+	
+	
+	<!-- ================================
+	@name getBook
+	@param idx
+	@result 
+	@author 김재형
+	@since 21.06.16
+	@description  도서관리 조회 페이지 - getBook
+	==================================== -->
+	<select id="getBook" parameterType="int"  resultType="com.cms.dto.common.BZBoard">
+		SELECT 	idx AS idx
+		,		strFirstImg
+		,		strSubject
+		,		strContent
+		,		strPreContent
+		, 		convert(varchar(16), dateRegdate, 120) AS dateRegdate
+		, 		bitDelete
+		FROM BZBoard_v2
+		WHERE idx = #{idx}
+	</select>	
+	
+	
+	<!-- ================================
+	@name removeBook
+	@param idx
+	@author 김재형
+	@since 21.06.16
+	@description  도서관리 삭제
+	==================================== -->
+	<delete id="removeBook" parameterType="int" >
+		DELETE FROM BZBoard_v2
+		WHERE idx = #{idx}
+	</delete>
+	
+	<!-- ================================
+	@name removeBookScrap
+	@param idx
+	@author 김재형
+	@since 21.06.16
+	@description  도서관리 Scrap 삭제
+	==================================== -->
+	<delete id="removeBookScrap" parameterType="int" >
+		DELETE FROM [BZBoard_Scrap_v2]
+		WHERE bidx = #{idx}
+	</delete>
+	
+	
+	<!-- ================================
+	@name modifyNotice
+	@param com.cms.dto.common.BZBoard
+	@result 
+	@author 김재형
+	@since 21.06.16
+	@description  도서관리  수정
+	==================================== -->
+	<update id="modifyBook" parameterType="com.cms.dto.common.BZBoard">
+		UPDATE BZBoard_v2
+		SET		bitDelete = #{bitDelete}
+		,		strSubject = #{strSubject}
+		,		strContent = #{strContent}
+		<if test="strFirstImg != null and !strFirstImg.equals('')">
+		,		strFirstImg = #{strFirstImg}
+		</if>
+		,		strPreContent = #{strPreContent}
+		WHERE idx = #{idx}
+	</update>
+	
+	
+</mapper>
+		

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%level] %logger{36} - %msg%n" />
+		</Console>
+	</Appenders>
+	
+	<Loggers>
+		<!-- Application Loggers -->
+		<Logger name="com.cms.cms" level="WARN" additivity="false">
+			<AppenderRef ref="console" />
+		</Logger>
+		
+		<Root level="WARN">
+			<AppenderRef ref="console" />
+		</Root>
+		
+	</Loggers>
+	
+</Configuration>

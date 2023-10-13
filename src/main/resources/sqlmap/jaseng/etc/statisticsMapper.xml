@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.etc.StatisticsDao">
+
+	<!-- ================================
+		@name getDoctorDataList
+		@param Date
+		@result com.cms.dto.etc.Statistics
+		@author JB
+		@since 21.10.26
+		@description get List  
+	==================================== -->
+	<select id="getDoctorDataList" parameterType="map" resultType="com.cms.dto.etc.Statistics">
+		SELECT 	a.CD_BCODE as bCode
+			, (select B_NAME from NT_BRANCH where B_idx = a.CD_BCODE) as bName
+			, 	a.Name as name
+			, 	sum(a.cnt) as effectCnt
+			, 	sum(a.mricnt) as mriCnt
+			,	sum(a.complimentcnt) as complimentCnt  
+ 		FROM (
+			select CD_BCODE, name, cnt, 0 as mricnt, 0 as complimentcnt  from (
+				select
+				cd_bcode, doctor_idx,
+				(select left(name,3) as name from BZDoctor where idx = TreatmentReview.doctor_idx) as name,
+				count(doctor_idx) as cnt
+				from TreatmentReview
+				where use_yn = 'Y' and convert(varchar(8), regdate, 112) between #{startDate} AND #{endDate}
+			group by cd_bcode, doctor_idx
+			) T
+			union   
+			select data.CD_BCODE, left(data.[mriDoctorName],3) as name, 0 as cnt, count(*) as mricnt, 0 as complimentcnt	
+			from (	
+				SELECT b.[intBoardID] ,b.[intThread] ,b.[dateRegdate] ,b.[idx],b.[CD_BCODE] ,b.[Disease] ,b.[mriDoctorName] 
+				FROM [New_Jaseng].[dbo].[BZBoard] b	
+			 	where intBOARDID  in (16) and convert(varchar(8), [dateRegdate], 112) between #{startDate} AND #{endDate} 
+			) as data 
+			group by data.CD_BCODE, data.[mriDoctorName]  
+			union 
+			select data.BCODE as CD_BCODE, left(data.DR_NM, 3) as Name, 0 as cnt, 0 as mricnt, count(data.BCODE) as complimentcnt 
+			from ( 
+				select 
+				( select Name from BZDoctor where idx = BZPraise.fidx  ) as DR_NM, 
+				( select UseYn from BZDoctor where idx = BZPraise.fidx  ) as DR_YN,
+				( select B_NAME from [dbo].[NT_BRANCH] where B_IDX = ( 
+															select top 1 gubun1_idx from [dbo].[BZDoctor_SiteOrder_Gubun2] 
+															where len(gubun1_idx) > 0 and idx in ( 
+																	select gubun2_idx from [dbo].[BZDoctor_SiteOrder_Detail]  
+																	where bzdoctor_idx = BZPraise.fidx  )  ) ) as BNAME, 
+				( select top 1 gubun1_idx from [dbo].[BZDoctor_SiteOrder_Gubun2] 
+															where len(gubun1_idx) > 0 and idx in ( 
+																	select gubun2_idx from [dbo].[BZDoctor_SiteOrder_Detail]  
+																	where bzdoctor_idx = BZPraise.fidx  )) as BCODE, regdate 
+				from BZPraise where 1=1 
+				and tbl = 'BZDoctor' 
+			) data where data.BNAME is not null and data.DR_YN = 'Y' and CONVERT(VARCHAR(8), data.regdate, 112) BETWEEN #{startDate} AND #{endDate} 
+			group by data.DR_NM, data.BCODE 
+ 		) as a 
+ 		group by a.CD_BCODE, a.name 
+ 		order by a.CD_BCODE 
+	</select>
+	
+	<!-- ================================
+		@name getBranchTotalList
+		@result com.cms.dto.etc.Statistics
+		@author JB
+		@since 22.05.31
+		@description get Branch effect 
+	==================================== -->
+	<select id="getBranchTotalList" resultType="com.cms.dto.etc.Statistics">
+		SELECT t1.B_IDX as bCode
+			, isNULL(t4.cnt1,0) as 'tvCnt'
+			, isNULL(t3.cnt1,0) as 'mriCnt'
+			, isNULL(t5.cnt1,0) as 'faceCnt'
+			, isNull(t2.cnt1, 0) as 'effectCnt'
+			, isNull(t2.cnt2, 0) as 'commentCnt'
+			, (isNull(t2.cnt1,0) + isNULL(t2.cnt2,0) + isNULL(t3.cnt1,0) + isNULL(t4.cnt1,0) + isNULL(t5.cnt1,0)) as 'colSum'
+		FROM  
+			( 
+				SELECT B_IDX  , B_ORDER
+				FROM NT_BRANCH WHERE B_STATUS = 'Y' and B_IDX not in (10000, 10018) 
+			) t1   
+			LEFT OUTER JOIN  
+			(
+				select
+					cd_bcode, count(cd_bcode) as cnt1,
+					(
+						select count(tblIdx) from BZComment
+						where
+						tblName = 'BZBoard'
+						and tblIdx in (
+							select idx from TreatmentReview A where use_yn = 'Y' and cd_bcode =  TreatmentReview.cd_bcode
+						)
+					) as cnt2
+				from TreatmentReview
+				where use_yn = 'Y'
+				group by cd_bcode
+			) t2  
+			ON t1.B_IDX = t2.CD_BCODE  
+			LEFT OUTER JOIN
+				( 
+				SELECT CD_BCODE, COUNT(idx) cnt1
+				FROM BZBoard  
+				WHERE IntBoardID='16'  
+				AND bitSecret = '0'  
+				AND bitDelete='0'  
+				GROUP BY CD_BCODE
+			) t3
+			ON t1.B_IDX = t3.CD_BCODE  
+			LEFT OUTER JOIN
+				( 
+					SELECT BRANCH, COUNT(idx) cnt1
+				FROM YOUTUBE
+					WHERE category1 = '치료영상' 
+				GROUP BY BRANCH
+			) t4
+			ON t1.B_IDX = t4.BRANCH  
+			LEFT OUTER JOIN
+				( 
+				SELECT CD_BCODE, COUNT(idx) cnt1
+				FROM BZBoard  
+				WHERE IntBoardID='112'  
+				AND bitSecret = '0'  
+				AND bitDelete='0'  
+				GROUP BY CD_BCODE
+			) t5
+			ON t1.B_IDX = t5.CD_BCODE  
+		order by t1.B_ORDER asc
+	</select>
+	
+	<!-- ================================
+		@name getEffectList
+		@result com.cms.dto.etc.Statistics
+		@author JB
+		@since 22.06.07
+		@description get effect List 
+	==================================== -->
+	<select id="getEffectList" parameterType="map"  resultType="com.cms.dto.etc.Statistics">
+		SELECT t1.B_IDX as bCode, isNull(t2.cnt1, 0) as effectCnt
+		FROM ( 
+				SELECT B_IDX ,  B_ORDER  
+			    FROM NT_BRANCH WHERE B_STATUS = 'Y' and B_IDX not in (10000, 10018) 
+			 ) t1   
+			  	LEFT OUTER JOIN (
+					select CD_BCODE, cnt1  from (
+						select
+							cd_bcode,
+							count(cd_bcode) as cnt1
+						from TreatmentReview
+						where use_yn = 'Y' and gubun = #{title}
+						AND CONVERT(varchar(8),regdate,112) BETWEEN #{date.startDate} AND #{date.endDate}
+						group by cd_bcode
+					) T
+			 	) t2
+			  ON t1.B_IDX = t2.CD_BCODE  
+		order by t1.B_ORDER asc
+	</select>
+	
+	<!-- ================================
+		@name getExList
+		@result com.cms.dto.etc.Statistics
+		@author JB
+		@since 22.06.09
+		@description get ex List 
+	==================================== -->
+	<select id="getExList" parameterType="map" resultType="com.cms.dto.etc.Statistics">
+		SELECT t1.B_IDX as bCode
+			, isNULL(t4.cnt1,0) as 'tvCnt'
+			, isNULL(t3.cnt1,0) as 'mriCnt'
+			, isNULL(t5.cnt1,0) as 'faceCnt'
+			, isNull(t2.cnt2, 0) as 'commentCnt'
+		FROM  
+		( 
+			SELECT B_IDX  , B_ORDER
+			FROM NT_BRANCH WHERE B_STATUS = 'Y' and B_IDX not in (10000, 10018) 
+		) t1   
+			LEFT OUTER JOIN  
+			(
+				select
+					CD_BCODE, count(cd_bcode) as cnt1,
+					( select count(*) from BZComment where useYn = 'Y' and tblName = 'BZBoard' and convert(varchar(8), regdate, 112) BETWEEN #{startDate} AND #{endDate} ) as cnt2
+				from TreatmentReview
+				where use_yn = 'Y' and convert(varchar(8), regdate, 112) BETWEEN #{startDate} AND #{endDate}
+		group by cd_bcode
+			) t2  
+			ON t1.B_IDX = t2.CD_BCODE  
+			LEFT OUTER JOIN
+				( 
+				SELECT CD_BCODE, COUNT(idx) cnt1
+				FROM BZBoard  
+				WHERE IntBoardID='16'  
+				AND bitSecret = '0'  
+				AND bitDelete='0'  
+				AND CONVERT(varchar(8),dateRegDate,112) BETWEEN #{startDate} AND #{endDate} 
+				GROUP BY CD_BCODE
+			) t3
+			ON t1.B_IDX = t3.CD_BCODE  
+			LEFT OUTER JOIN
+				( 
+					SELECT BRANCH, COUNT(idx) cnt1
+				FROM YOUTUBE
+					WHERE category1 = '치료영상' 
+					AND CONVERT(varchar(8),regDate,112) BETWEEN #{startDate} AND #{endDate} 
+				GROUP BY BRANCH
+			) t4
+			ON t1.B_IDX = t4.BRANCH  
+			LEFT OUTER JOIN
+				( 
+				SELECT CD_BCODE, COUNT(idx) cnt1
+				FROM BZBoard  
+				WHERE IntBoardID='112'  
+				AND bitSecret = '0'  
+				AND bitDelete='0'  
+				AND CONVERT(varchar(8),dateRegDate,112) BETWEEN #{startDate} AND #{endDate} 
+				GROUP BY CD_BCODE
+			) t5
+			ON t1.B_IDX = t5.CD_BCODE  
+		order by t1.B_ORDER asc
+	</select>
+	
+	<!-- ================================
+		@name getMonthList
+		@result HashMap
+		@author JB
+		@since 22.06.15
+		@description get Month List 
+	==================================== -->
+	<select id="getMonthList" parameterType="int" resultType="HashMap">
+		WITH BRANCH AS (
+			SELECT B_IDX, B_NAME , B_ORDER
+			FROM NT_BRANCH 
+			WHERE B_STATUS = 'Y' and B_IDX not in (10000, 10018) 
+		),
+		EFFECT AS (
+			SELECT b.B_NAME, b.B_ORDER,  e.dateRegDate, e.cnt
+			FROM BRANCH b LEFT OUTER  JOIN (
+				select
+					CD_BCODE,month(regdate) as dateRegDate, count(cd_bcode) as cnt
+				from TreatmentReview
+				where use_yn = 'Y'
+				and year(regdate) = #{year}
+				group by cd_bcode, month(regdate)
+			) e ON b.B_IDX = e.CD_BCODE
+			LEFT OUTER JOIN ( 
+				SELECT BRANCH, MONTH([regdate]) as dateRegDate, COUNT(idx) cnt
+				FROM YOUTUBE
+				WHERE category1 = '치료영상' 
+					AND CONVERT(varchar(4),[regdate],112) = #{year} 
+				GROUP BY BRANCH, MONTH([regdate])
+			) t
+			ON b.B_IDX = t.BRANCH  
+			
+		)
+		select *
+		from (
+			select B_NAME, B_ORDER, dateRegDate, cnt
+			from EFFECT
+			) as result
+		PIVOT (
+			SUM(cnt) for dateRegDate IN ([1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12] )
+			) as pivotRes
+		ORDER BY B_ORDER asc
+	</select>
+	
+	<!-- ================================
+		@name getMonthExList
+		@result HashMap
+		@author JB
+		@since 22.06.16
+		@description get Month EX List 
+	==================================== -->
+	<select id="getMonthExList" parameterType="int" resultType="HashMap">
+		WITH EFFECT AS (
+			select
+				'치료후기' as title,
+				month(regdate) as dateRegDate,
+				count(cd_bcode) as cnt,
+				4 as sort
+			from TreatmentReview
+			where use_yn = 'Y' and year(regdate) = #{year}
+			group by month(regdate)
+		),
+		EFFECTCMT AS (
+			select
+				'치료후기댓글' as title,
+				MONTH(regdate) as dateRegDate,
+				(
+					select
+						count(tblIdx) from BZComment
+					where
+						tblName = 'BZBoard'
+						and tblIdx in (
+							select idx from TreatmentReview A where use_yn = 'Y' AND year(regdate) = #{year} and MONTH(regdate) = MONTH(TreatmentReview.regdate)
+						)
+				) as cnt,
+				5 as sort
+			from TreatmentReview
+			where
+				use_yn = 'Y' and year(regdate) = #{year}
+			group by MONTH(regdate)
+		),
+		MRI AS (			   		 	  	  	   		
+			SELECT 'MRI' as title, MONTH(dateRegDate) as dateRegDate,  COUNT(idx) cnt, 2 as sort
+			FROM BZBoard  
+			WHERE IntBoardID='16'  
+			AND bitSecret = '0'  
+			AND bitDelete='0' 
+			AND CONVERT(varchar(4),dateRegDate,112) = #{year}
+			GROUP BY MONTH(dateRegDate)
+		),
+		TV AS (	
+			SELECT '치료영상' as title, MONTH([regdate]) as dateRegDate, COUNT(idx) cnt, 1 as sort
+			FROM YOUTUBE
+				WHERE category1 = '치료영상' 
+			AND CONVERT(varchar(4),[regdate],112) = #{year}
+			GROUP BY MONTH([regdate])
+		),
+		FACE AS (
+			select
+				'안면신경마비' as title,
+				month(regdate) as dateRegDate,
+				count(cd_bcode) as cnt,
+				3 as sort
+			from TreatmentReview
+			where use_yn = 'Y' and year(regdate) = #{year} and gubun = '안면신경마비'
+			group by month(regdate)
+		)
+		select *
+		from (
+			select title, dateRegDate, cnt, sort
+			FROM EFFECT
+			union ALL
+			select title, dateRegDate, cnt, sort
+			FROM EFFECTCMT
+			union ALL
+			select title, dateRegDate, cnt, sort
+			FROM MRI
+			union ALL
+			select title, dateRegDate, cnt, sort
+			FROM TV
+			union ALL
+			select title, dateRegDate, cnt, sort
+			FROM FACE
+			) as result
+		PIVOT (
+			SUM(cnt) for dateRegDate IN ([1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12] )
+			) as pivotRes
+		ORDER BY sort 
+	</select>
+	
+</mapper>

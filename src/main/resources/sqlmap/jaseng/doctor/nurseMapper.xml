@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.doctor.NurseDao">
+
+	<!-- ================================
+		@name getNurseAllList
+		@param 
+		@result com.cms.dto.doctor.Nurse
+		@author JB
+		@since 21.10.21
+		@description get Nurse List  
+	==================================== -->
+	<select id="getNurseAllList" resultType="com.cms.dto.doctor.Nurse">
+		SELECT	idx
+			,	Code as bCode
+			, (select B_NAME from NT_BRANCH where B_idx = A.Code) as bName
+			,	Name as name
+			,	idno
+			,	UseYN as useYN
+			,	RegDate as regDate
+			,	B.didx
+			, (select Name from BZDoctor where idx = isnull(B.didx,0)) as doctorName
+		FROM [BZNurse] A LEFT JOIN [BZNursenDr] B ON A.idx = B.nidx
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name getDoctorList
+		@param int
+		@result com.cms.dto.doctor.Nurse
+		@author JB
+		@since 21.10.22
+		@description get Doctor List  
+	==================================== -->
+	<select id="getDoctorList" parameterType="int" resultType="com.cms.dto.doctor.Nurse">
+		SELECT idx
+			,	Name as name
+			,	B_Name	as bName
+		FROM	VIEW_BZDoctor_CD_SITE
+		WHERE UseYn = 'Y' and gubun2_name = '진료일정표'
+			AND B_idx = #{idx}
+		ORDER BY Name ASC
+	</select>
+	
+	<!-- ================================
+		@name setNurse
+		@param com.cms.dto.doctor.Nurse
+		@result 
+		@author JB
+		@since 21.10.22
+		@description set Nurse
+	==================================== -->
+	<insert id="setNurse" parameterType="com.cms.dto.doctor.Nurse">
+			INSERT INTO [BZNurse] (
+					Code
+				,	Name
+				,	UseYN
+				,	RegDate
+				,	idno
+			) VALUES (
+					#{bCode}
+				,	#{name}
+				,	#{useYN}
+				,	getdate()
+				,	#{idno}
+			)
+	</insert>
+	
+	<!-- ================================
+		@name getNurse
+		@param int
+		@result com.cms.dto.doctor.Nurse
+		@author JB
+		@since 21.10.22
+		@description get Nurse
+	==================================== -->
+	<select id="getNurse" parameterType="int" resultType="com.cms.dto.doctor.Nurse">
+		SELECT	idx
+			,	Code as bCode
+			,	Name as name
+			,	UseYN as useYN
+			,	idno
+		FROM [BZNurse]
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyNurse
+		@param com.cms.dto.doctor.Nurse
+		@result 
+		@author JB
+		@since 21.10.22
+		@description modify Nurse
+	==================================== -->
+	<update id="modifyNurse" parameterType="com.cms.dto.doctor.Nurse">
+		UPDATE BZNurse
+		SET 	Code = #{bCode}
+			,	Name = #{name}
+			,	UseYN = #{useYN}
+			,	idno = #{idno}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name taSwap
+		@param didx
+		@result 
+		@author JB
+		@since 21.02.22
+		@description ta swap
+	==================================== -->
+	<update id="taSwap" parameterType="int">
+		UPDATE BZDoctor
+		SET ImgFile = '/Upload/Doctor/' + idno + '.png'
+		WHERE idx = #{didx}
+	</update>
+	
+	<!-- ================================
+		@name resiSwap
+		@param didx
+		@result 
+		@author JB
+		@since 21.02.22
+		@description resident swap
+	==================================== -->
+	<update id="resiSwap" parameterType="int">
+		UPDATE BZDoctor
+		SET ImgFile = imgFile_tmp
+		WHERE idx = #{didx}
+	</update>
+</mapper>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.contents.academy.EducationDao">
+
+		
+	<!-- ================================
+		@name getOnlineList
+		@param 
+		@result com.cms.dto.contents.academy.Education
+		@author 박종배
+		@since 21.09.02
+		@description get Online Education List  
+	==================================== -->
+	<select id="getOnlineList" resultType="com.cms.dto.contents.academy.Education">
+		SELECT 	
+				idx
+			,	Gubun as gubun
+			,	Title as title
+			,	Url as url
+			, 	UseYn as useYN
+			,	CONVERT(varchar(10), RegDate, 121) as regDate
+		FROM [Academy_Education]
+		WHERE OnlineYn = 'Y'
+		ORDER BY Idx DESC
+	</select>
+
+	<!-- ================================
+		@name getOfflineList
+		@param 
+		@result com.cms.dto.contents.academy.Education
+		@author 박종배
+		@since 21.09.02
+		@description get Offline Education List  
+	==================================== -->
+	<select id="getOfflineList" resultType="com.cms.dto.contents.academy.Education">
+		SELECT 	
+				idx
+			,	Gubun as gubun
+			,	Title as title
+			,	Url as url
+			, 	UseYn as useYN
+			,	CONVERT(varchar(10), RegDate, 121) as regDate
+		FROM [Academy_Education]
+		WHERE OnlineYn = 'N'
+		ORDER BY Idx DESC
+	</select>
+	
+	
+	<!-- ================================
+		@name setOnline
+		@param com.cms.dto.contents.academy.Education
+		@result 
+		@author 박종배
+		@since 21.09.03
+		@description set Online data  
+	==================================== -->
+	<insert id="setOnline" parameterType="com.cms.dto.contents.academy.Education">
+		INSERT INTO Academy_Education (
+				OnlineYn
+			,	Gubun
+			,	Title
+			,	Url
+			,	RegDate
+			,	RegUser
+			,	UseYn
+		) VALUES (
+				'Y'
+			,	#{gubun}
+			,	#{title}
+			,	#{url}
+			,	convert(date, #{regDate})
+			,	#{regUser}
+			,	#{useYN}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name setOffline
+		@param com.cms.dto.contents.academy.Education
+		@result 
+		@author 박종배
+		@since 21.09.03
+		@description set Offline data  
+	==================================== -->
+	<insert id="setOffline" parameterType="com.cms.dto.contents.academy.Education">
+		INSERT INTO Academy_Education (
+				OnlineYn
+			,	Gubun
+			,	Title
+			,	Url
+			,	RegDate
+			,	RegUser
+			,	UseYn
+		) VALUES (
+				'N'
+			,	#{gubun}
+			,	#{title}
+			,	#{url}
+			,	convert(date, #{regDate})
+			,	#{regUser}
+			,	#{useYN}
+		)
+	</insert>
+	
+	
+	<!-- ================================
+		@name getOnlineOne
+		@param idx
+		@result com.cms.dto.contents.academy.Education
+		@author 박종배
+		@since 21.09.06
+		@description get Online data  
+	==================================== -->
+	<select id="getOnlineOne" parameterType="int"  resultType="com.cms.dto.contents.academy.Education">
+		SELECT 	
+				Idx as idx
+			,	Gubun as gubun
+			,	Title as title 
+			,	Url as url
+			,	UseYn as useYN
+			,	convert(varchar(8), RegDate, 112) as regDate
+		FROM Academy_Education
+		WHERE idx = #{idx}
+			AND OnlineYn = 'Y'
+	</select>
+	
+	<!-- ================================
+		@name getOfflineOne
+		@param idx
+		@result com.cms.dto.contents.academy.Education
+		@author 박종배
+		@since 21.09.06
+		@description get Offline data  
+	==================================== -->
+	<select id="getOfflineOne" parameterType="int"  resultType="com.cms.dto.contents.academy.Education">
+		SELECT 	
+				Idx as idx
+			,	Gubun as gubun
+			,	Title as title 
+			,	Url as url
+			,	UseYn as useYN
+			,	convert(varchar(8), RegDate, 112) as regDate
+		FROM Academy_Education
+		WHERE idx = #{idx}
+			AND OnlineYn = 'N'
+	</select>
+	
+		
+	<!-- ================================
+		@name modifyOnlineOne
+		@param com.cms.dto.contents.academy.Education
+		@result 
+		@author 박종배
+		@since 21.09.07
+		@description modify online data
+	==================================== -->
+	<update id="modifyOnlineOne" parameterType="com.cms.dto.contents.academy.Education">
+	
+		UPDATE Academy_Education
+		SET 	Title = #{title}
+			,	Gubun = #{gubun}
+			,	Url = #{url}
+			,	ModUser = #{modUser}
+			,	UseYn = #{useYN}
+			,	RegDate = convert(date, #{regDate})
+			,	ModDate = GETDATE()
+		 WHERE idx = #{idx}
+		 	AND OnlineYn = 'Y'
+	</update>
+	
+	<!-- ================================
+		@name modifyOfflineOne
+		@param com.cms.dto.contents.academy.Education
+		@result 
+		@author 박종배
+		@since 21.09.07
+		@description modify offline data
+	==================================== -->
+	<update id="modifyOfflineOne" parameterType="com.cms.dto.contents.academy.Education">
+	
+		UPDATE Academy_Education
+		SET 	Title = #{title}
+			,	Gubun = #{gubun}
+			,	Url = #{url}
+			,	ModUser = #{modUser}
+			,	UseYn = #{useYN}
+			,	RegDate = convert(date, #{regDate})
+			,	ModDate = GETDATE()
+		 WHERE idx = #{idx}
+		 	AND OnlineYn = 'N'
+	</update>
+	
+	<!-- ================================
+	@name removeEducation
+	@param idx
+	@author 박종배
+	@since 21.09.07
+	@description remove Education Data
+	==================================== -->
+	<delete id="removeEducation" parameterType="int" >
+		DELETE FROM Academy_Education
+		WHERE Idx = #{idx}
+	</delete>
+	
+</mapper>

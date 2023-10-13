@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.user.UserDao">
+
+	<!-- ================================
+		@name getUserList
+		@param 
+		@result com.cms.dto.user.User
+		@author 박종배
+		@since 21.09.16
+		@description get User List  
+	==================================== -->
+	<select id="getUserList" resultType="com.cms.dto.user.User">
+		SELECT 	
+				idx
+			,	id
+			,	name
+			,	mailing_yn as mailingYN
+			,	member_date as memberDate
+			, 	SiteCode as siteCode
+			,	logindate
+			,	agree_yn as agreeYN
+			,	(SELECT B_NAME FROM NT_BRANCH WHERE B_IDX = branch_code) as bName
+			,	joinFlag
+		FROM [jaseng_new].[dbo].[member]
+		ORDER BY idx DESC
+	</select>
+	
+</mapper>

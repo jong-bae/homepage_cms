@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.NonPayDao">
+
+	<!-- ================================
+		@name getNonPaymentAllCount
+		@param 
+		@result int
+		@author JB
+		@since 21.05.27
+		@description  get Nonpayment All count
+	==================================== -->
+	<select id="getNonPaymentAllCount" resultType="int">
+		SELECT COUNT(*) as AllCNT FROM NPAYMENT_v2
+	</select>
+	
+	<!-- ================================
+		@name getNonPaymentList
+		@param 
+		@result com.cms.dto.contents.contentsmanage.NonPayment
+		@author JB
+		@since 21.05.27
+		@description  get Nonpayment List
+	==================================== -->
+	<select id="getNonPaymentList" parameterType="com.cms.dto.contents.contentsmanage.NonPayment" resultType="com.cms.dto.contents.contentsmanage.NonPayment">
+		SELECT
+				idx, bName, code, codeName, itemName, itemCode, itemDivision, cost, minCost, maxCost, 
+				convert(varchar(10), (CASE WHEN updateDate IS NOT NULL THEN updateDate ELSE historyDate END), 121) as updateDate
+		FROM (
+			SELECT	idx
+				,	(SELECT B_Name FROM dbo.NT_BRANCH where b_idx = A.b_code) as bName
+				,	(SELECT Exp FROM [BZCode] B WHERE B.Code = A.[code] ) as code
+				,	code_name as codeName
+				,	item_name as itemName
+				,	item_code as itemCode
+				,	item_division as itemDivision
+				,	cost
+				,	min_cost as minCost
+				,	max_cost as maxCost
+				,	(CASE WHEN mod_date IS NOT NULL THEN mod_date ELSE reg_date END) as updateDate
+				,	(SELECT TOP 1 [history_date] FROM [NPAYMENT_history] 
+						<if test='uuid != "N"'>
+							WHERE uuid = #{uuid}
+						</if>
+						ORDER BY history_date DESC  ) as historyDate
+			FROM NPAYMENT_v2 A
+			WHERE 
+			<choose>
+				<when test='uuid == "N"'>
+					uuid = (
+								SELECT TOP 1 uuid
+							  	FROM [New_Jaseng].[dbo].[NPAYMENT_history]
+							  	ORDER BY history_date DESC
+						)
+				</when>
+				<otherwise>
+					uuid = #{uuid}
+				</otherwise>
+			</choose>
+			) AA
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name getHistoryDateList
+		@param int 
+		@result com.cms.dto.contents.contentsmanage.NonPayment
+		@author JB
+		@since 21.05.28
+		@description  get HistoryDate List
+	==================================== -->
+	<select id="getHistoryDateList" parameterType="int" resultType="com.cms.dto.contents.contentsmanage.NonPayment" >
+		SELECT history_date+1 as historyDate
+			,	uuid 
+		FROM [NPAYMENT_history] 
+		WHERE BCODE = #{bCode}
+		ORDER BY history_date DESC
+	</select>
+	
+	<!-- ================================
+		@name getNonPaymentOne
+		@param int 
+		@result com.cms.dto.contents.contentsmanage.NonPayment
+		@author JB
+		@since 21.06.04
+		@description  get nonPayment One
+	==================================== -->
+	<select id="getNonPaymentOne" parameterType="int" resultType="com.cms.dto.contents.contentsmanage.NonPayment">
+		SELECT 	idx
+			,	b_code as bCode
+			,	code
+			,  (select Parent_Code from BZCode b where b.Code = a.code) as parentCode
+			,	code_name as codeName
+			,	item_name as itemName
+			,	item_code as itemCode
+			,	item_division as itemDivision
+			,	cost 
+			,	min_cost as minCost
+			,	max_cost as maxCost
+			,	material_yn as materialYN
+			,	drug_yn as drugYN
+			,	etc
+			,	uuid
+			,	convert(varchar(8), (CASE WHEN mod_date IS NOT NULL THEN mod_date ELSE reg_date END), 112) as updateDate
+		FROM NPAYMENT_v2 a
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyNonPaymentOne
+		@param com.cms.dto.contents.contentsmanage.NonPayment
+		@result 
+		@author JB
+		@since 21.06.08
+		@description  modify nonPayment One
+	==================================== -->
+	<update id="modifyNonPaymentOne" parameterType="com.cms.dto.contents.contentsmanage.NonPayment">
+		UPDATE NPAYMENT_v2
+		SET		code = #{code}
+			,	code_name = #{codeName}
+			,	item_name = #{itemName}
+			,	item_code = #{itemCode}
+			,	item_division = #{itemDivision}
+			,	cost = #{cost}
+			,	min_cost = #{minCost}
+			,	max_cost = #{maxCost}
+			,	material_yn = #{materialYN}
+			,	drug_yn = #{drugYN}
+			,	etc = #{etc}
+			,	mod_date = #{regDate}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name setExcelNonPayment
+		@param map
+		@result 
+		@author JB
+		@since 21.08.18
+		@description  insert Excel Upload NonPayment Data
+	==================================== -->
+	<insert id="setExcelNonPayment" parameterType="map" >
+			<!-- <foreach collection="excel" item="col"> -->
+		INSERT INTO NPAYMENT_v2 (
+				[b_code]
+      		,	[code]
+		    ,	[code_name]
+		    ,	[item_name]
+		    ,	[item_code]
+		    ,	[item_division]
+		    ,	[cost]
+		    ,	[min_cost]
+		    ,	[max_cost]
+		    ,	[material_yn]
+		    ,	[drug_yn]
+		    ,	[etc]
+		    ,	[uuid]
+		    ,	[reg_date]
+		) VALUES 
+			<foreach collection="excel" item="col" separator=",">
+				( 		#{np.bCode}
+					,	#{col.A}
+					,	#{col.B}
+					,	#{col.C}
+					,	#{col.D}
+					,	#{col.E}
+					,	#{col.F}
+					,	#{col.G}
+					,	#{col.H}
+					,	#{col.I}
+					,	#{col.J}
+					,	#{col.K}
+					,	#{np.uuid}
+				<choose>
+					<when test='col.L.equals("")'>
+						,	CONVERT(date, #{np.updateDate} )
+					</when>
+					<otherwise>
+						,	CONVERT(date, #{col.L} )
+					</otherwise>
+				</choose>
+				)
+			</foreach> 
+			;
+	</insert>
+	
+	<!-- ================================
+		@name setNonPaymentHistory
+		@param com.cms.dto.contents.contentsmanage.NonPayment
+		@result 
+		@author JB
+		@since 21.08.18
+		@description    insert NonPayment History
+	==================================== -->
+	<insert id="setNonPaymentHistory" parameterType="com.cms.dto.contents.contentsmanage.NonPayment">
+		INSERT INTO [NPAYMENT_history]
+		VALUES ( 
+				#{bCode}
+			,	CONVERT(date, #{updateDate} )
+			,	#{uuid}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name setRenewNonPayment
+		@param com.cms.dto.contents.contentsmanage.NonPayment
+		@result 
+		@author JB
+		@since 21.08.25
+		@description   insert All renew NonPayment  
+	==================================== -->
+	<insert id="setRenewNonPayment" parameterType="com.cms.dto.contents.contentsmanage.NonPayment">
+		INSERT INTO [NPAYMENT_v2] (
+				b_code
+			,	code
+			,	code_name
+			,	item_name
+			,	item_code
+			,	item_division
+			,	cost
+			,	min_cost
+			,	max_cost
+			,	material_yn
+			,	drug_yn
+			,	etc
+			,	uuid
+			,	reg_date
+		) SELECT
+				b_code
+			,	code
+			,	code_name
+			,	item_name
+			,	item_code
+			,	item_division
+			,	cost
+			,	min_cost
+			,	max_cost
+			,	material_yn
+			,	drug_yn
+			,	etc
+			,	#{uuid}
+			,	reg_date
+		FROM NPAYMENT_v2
+		WHERE uuid = ( SELECT TOP 1 uuid
+						 FROM NPAYMENT_history 
+						 WHERE BCODE = #{bCode} 
+						 ORDER BY history_date DESC 
+					) 
+	</insert>
+	
+	<!-- ================================
+		@name setNonPayment
+		@param com.cms.dto.contents.contentsmanage.NonPayment
+		@result 
+		@author JB
+		@since 21.08.25
+		@description   insert NonPayment  
+	==================================== -->
+	<insert id="setNonPayment" parameterType="com.cms.dto.contents.contentsmanage.NonPayment">
+		INSERT INTO NPAYMENT_v2 (
+				b_code
+			,	code
+			,	code_name
+			,	item_name
+			,	item_code
+			,	item_division
+			,	cost
+			,	min_cost
+			,	max_cost
+			,	material_yn
+			,	drug_yn
+			,	etc
+			,	uuid
+			,	reg_date
+		) VALUES (
+				#{bCode}
+			,	#{code}
+			,	#{codeName}
+			,	#{itemName}
+			,	#{itemCode}
+			,	#{itemDivision}
+			,	#{cost}
+			,	#{minCost}
+			,	#{maxCost}
+			,	#{materialYN}
+			,	#{drugYN}
+			,	#{etc}
+			,	#{uuid}
+			,	#{regDate}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getNonPaymentExcelList
+		@param 
+		@result com.cms.dto.contents.contentsmanage.NonPayment
+		@author JB
+		@since 21.08.31
+		@description  get  NonPayment Excel List  
+	==================================== -->
+	<select id="getNonPaymentExcelList" resultType="com.cms.dto.contents.contentsmanage.NonPayment">
+		SELECT	
+				(SELECT Exp FROM [BZCode] B WHERE B.Code = A.[code] ) as code
+			,	code_name as codeName
+			,	item_name as itemName
+			,	item_code as itemCode
+			,	item_division as itemDivision
+			,	cost
+			,	min_cost as minCost
+			,	max_cost as maxCost
+			,	material_yn as materialYN
+			,	drug_yn as drugYN
+			,	etc
+			,	CONVERT(varchar(10), (CASE WHEN mod_date IS NOT NULL THEN mod_date ELSE reg_date END), 112) as updateDate
+		FROM NPAYMENT_v2 A
+		WHERE 			
+					uuid = #{uuid}
+				AND b_code = #{bCode}
+	</select>
+
+</mapper>

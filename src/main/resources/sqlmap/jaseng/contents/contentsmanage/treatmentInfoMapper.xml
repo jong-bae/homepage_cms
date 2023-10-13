@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.TreatmentInfoDao">
+
+	<!-- ================================
+		@name getTreatmentInfoList
+		@param 
+		@result com.cms.dto.contents.contentsmanage.TreatmentInfo
+		@author JB
+		@since 21.05.11
+		@description  get treatmentInfo List
+	==================================== -->
+	<select id="getTreatmentInfoList" resultType="com.cms.dto.contents.contentsmanage.TreatmentInfo">
+		SELECT 	bcode
+			,	timetable
+			,	timetable_M
+			,	(SELECT B_NAME FROM NT_BRANCH WHERE B_IDX = bcode) as bName
+			,	regDate
+		FROM [Info_timetable]
+		ORDER BY bcode ASC
+	</select>
+	
+	<!-- ================================
+		@name setTreatmentInfo
+		@param com.cms.dto.contents.contentsmanage.TreatmentInfo
+		@result 
+		@author JB
+		@since 21.05.11
+		@description  set treatmentInfo 
+	==================================== -->
+	<insert id="setTreatmentInfo" parameterType="com.cms.dto.contents.contentsmanage.TreatmentInfo">
+		INSERT INTO Info_timetable (
+				bcode
+			,	timetable
+			,	timetable_M
+			,	regDate
+		) VALUES (
+				#{bcode}
+			,	#{timetable}
+			,	#{timetable_M}
+			,	GETDATE()
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getTreatmentInfoOne
+		@param  int
+		@result com.cms.dto.contents.contentsmanage.TreatmentInfo
+		@author JB
+		@since 21.05.11
+		@description  get treatmentInfo One
+	==================================== -->
+	<select id="getTreatmentInfoOne" parameterType="int" resultType="com.cms.dto.contents.contentsmanage.TreatmentInfo">
+		SELECT 	bcode
+			,	timetable
+			,	timetable_M
+			,	(SELECT B_NAME FROM NT_BRANCH WHERE B_IDX = #{bcode}) as bName
+		FROM [Info_timetable]
+		WHERE bcode = #{bcode}
+		ORDER BY bcode ASC
+	</select>
+	
+	<!-- ================================
+		@name modifyTreatmentInfoOne
+		@param  com.cms.dto.contents.contentsmanage.TreatmentInfo
+		@result 
+		@author JB
+		@since 21.05.13
+		@description  modify treatmentInfo One
+	==================================== -->
+	<update id="modifyTreatmentInfoOne" parameterType="com.cms.dto.contents.contentsmanage.TreatmentInfo">
+		UPDATE Info_timetable
+		SET		timetable = #{timetable}
+			,	timetable_M = #{timetable_M}
+			,	regDate = GETDATE()
+		WHERE bcode = #{bcode}
+	</update>
+
+</mapper>

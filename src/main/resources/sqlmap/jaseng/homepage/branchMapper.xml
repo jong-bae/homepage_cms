@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.homepage.BranchDao">
+
+	<!-- ================================
+		@name getBranchList
+		@param 
+		@result com.cms.dto.homepage.Branch
+		@author JB
+		@since 20.10.15
+		@description get branch List  
+	==================================== -->
+	<select id="getBranchList" resultType="com.cms.dto.homepage.Branch">
+		SELECT B_IDX as bCode
+			,	B_NAME as bName
+			,	B_STATUS as bStatus
+			,	B_REGDATE as regDate
+		FROM [NT_BRANCH]
+		ORDER BY B_IDX ASC
+	</select>
+	
+	<!-- ================================
+		@name getBranch
+		@param int
+		@result com.cms.dto.homepage.Branch
+		@author JB
+		@since 20.10.16
+		@description get branch  
+	==================================== -->
+	<select id="getBranch" parameterType="int" resultType="com.cms.dto.homepage.Branch">
+		SELECT  B_IDX as bCode
+			,	B_NAME as bName
+			,	B_FOLDER as bFolder
+			,	B_HOSPITAL as bHospital
+			,	B_ADDR as bAddr
+			,	B_DOMAIN as bDomain
+			,	B_KAKAOPF as kakaopf
+			,	B_FACEBOOK as facebook
+			,	B_BLOG	as blog
+			,	B_CAFE as cafe
+			,	B_NPOST as npost
+			,	B_AUDIOCLIP as audioclip
+			,	B_YOUTUBE as youtube
+			,	B_INSTAGRAM as instagram
+			,	B_CI_IMG as bCiImg_origin
+			,	B_cert01_IMG as bCertImg01_origin
+			,	B_cert01_txt as bCertTxt01
+			,	B_cert02_IMG as bCertImg02_origin
+			,	B_cert02_txt as bCertTxt02
+			,	B_STATUS as bStatus
+			,	B_SEARCHADDR as bSearchAddr
+			,	B_FOOTERTXT1 as bFooterTxt1
+			,	B_FOOTERTXT2 as bFooterTxt2
+		FROM NT_BRANCH
+		WHERE B_IDX = #{bCode}
+	</select>
+	
+	<!-- ================================
+		@name setBranch
+		@param com.cms.dto.homepage.Branch
+		@result 
+		@author JB
+		@since 20.10.122
+		@description set branch  
+	==================================== -->
+	<insert id="setBranch" parameterType="com.cms.dto.homepage.Branch">
+		INSERT INTO NT_BRANCH (
+				B_NAME
+			,	B_ORDER
+			,	B_STATUS
+			,	B_CI_IMG
+			,	B_HOSPITAL
+			,	B_ADDR
+			,	B_FOOTERTXT1
+			,	B_FOOTERTXT2
+			,	B_SEARCHADDR
+			,	B_REGDATE
+			,	B_DOMAIN
+			,	B_FACEBOOK
+			,	B_BLOG
+			,	B_CAFE
+			,	B_YOUTUBE
+			,	B_INSTAGRAM
+			,	B_KAKAOPF
+			,	B_AUDIOCLIP
+			,	B_NPOST
+			,	B_cert01_IMG
+			,	B_cert01_txt
+			,	B_cert02_IMG
+			,	B_cert02_txt
+		) VALUES (
+				#{bName}
+			,	#{bOrder}
+			,	#{bStatus}
+			,	#{bCiImg}
+			,	#{bHospital}
+			,	#{bAddr}
+			,	#{bFooterTxt1}
+			,	#{bFooterTxt2}
+			,	#{bSearchAddr}
+			,	GETDATE()
+			,	#{bDomain}
+			,	#{facebook}
+			,	#{blog}
+			,	#{cafe}
+			,	#{youtube}
+			,	#{instagram}
+			,	#{kakaopf}
+			,	#{audioclip}
+			,	#{npost}
+			,	#{bCertImg01}
+			,	#{bCertTxt01}
+			,	#{bCertImg02}
+			,	#{bCertTxt02}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name modifyBranch
+		@param com.cms.dto.homepage.Branch
+		@result 
+		@author JB
+		@since 20.10.23
+		@description update branch  
+	==================================== -->
+	<update id="modifyBranch" parameterType="com.cms.dto.homepage.Branch">
+		UPDATE NT_BRANCH
+		SET 	B_NAME = #{bName}
+			,	B_STATUS = #{bStatus}
+			,	B_CI_IMG = #{bCiImg}
+			,	B_HOSPITAL = #{bHospital}
+			,	B_ADDR = #{bAddr}
+			,	B_FOOTERTXT1 = #{bFooterTxt1}
+			,	B_FOOTERTXT2 = #{bFooterTxt2}
+			,	B_SEARCHADDR = #{bSearchAddr}
+			,	B_FOLDER = #{bFolder}
+			,	B_DOMAIN = #{bDomain}
+			,	B_FACEBOOK = #{facebook}
+			,	B_BLOG = #{blog}
+			,	B_CAFE = #{cafe}
+			,	B_YOUTUBE = #{youtube}
+			,	B_INSTAGRAM = #{instagram}
+			,	B_KAKAOPF = #{kakaopf}
+			,	B_AUDIOCLIP = #{audioclip}
+			,	B_NPOST = #{npost}
+			,	B_cert01_IMG = #{bCertImg01}
+			,	B_cert01_txt = #{bCertTxt01}
+			,	B_cert02_IMG = #{bCertImg02}
+			,	B_cert02_txt = #{bCertTxt02}
+		WHERE B_IDX = #{bCode}
+	</update>
+</mapper>

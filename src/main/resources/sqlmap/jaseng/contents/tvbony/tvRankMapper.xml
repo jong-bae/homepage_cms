@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.contents.tvbony.TvrankDao">
+	
+	<!-- ================================
+		@name getTvcodeList
+		@param 
+		@result com.cms.dto.contents.tvbony.TvCode
+		@author JB
+		@since 22.06.20
+		@description  get TVCODE List
+	==================================== -->
+	<select id="getTvcodeList" resultType="com.cms.dto.contents.tvbony.Tvbony">
+		SELECT IDX as idx
+			,	VID as vid
+			,	TITLE as title
+			,	MMAIN_YN as mmain_yn
+			,	convert(varchar, MAIN_MODDATE, 120) as main_moddate
+		FROM JASENG_TV
+		WHERE REAL_YN = 'Y' 
+			AND MAIN_YN = 'Y' 
+		ORDER BY MAIN_MODDATE DESC
+	</select>	
+	
+	<!-- ================================
+		@name setOrder
+		@param 
+		@result 
+		@author JB
+		@since 22.06.27
+		@description  set Order
+	==================================== -->
+	<update id="setOrder" parameterType="map">
+		UPDATE JASENG_TV
+		SET MAIN_MODDATE = DATEADD(s, #{key}, getdate())
+		WHERE IDX = #{idx}
+	</update>
+	
+</mapper>

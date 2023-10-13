@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.contents.contentsmanage.PersonalInfoDao">
+
+		
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.contents.PersonalInfo
+		@result 
+		@author 김재형
+		@since 20.10.26
+		@description 개인정보처리 방침 조회 페이지 - get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.contents.contentsmanage.PersonalInfo">
+		SELECT 	idx
+		,		title
+		, 		bCode
+		, 		convert(varchar(16), insertdate, 120) AS insertdate
+		, 		pid
+		, 		version
+		, 		useYN
+		, (SELECT B_Name FROM dbo.NT_BRANCH where b_idx = A.bcode) AS bname
+		FROM BZPersonalInfo AS A
+		ORDER BY idx DESC
+	</select>
+	
+	
+	<!-- ================================
+		@name setPersonalInfo
+		@param com.cms.dto.contents.PersonalInfo
+		@result 
+		@author 김재형
+		@since 20.10.28
+		@description 개인정보처리 방침 등록  
+	==================================== -->
+	<insert id="setPersonalInfo" parameterType="com.cms.dto.contents.contentsmanage.PersonalInfo">
+		INSERT INTO BZPersonalInfo (
+				title
+			,	BCode
+			,	strContents
+			,	version
+			,	insertDate
+			,	pid
+			,	useYN
+		) VALUES (
+				#{title}
+			,	#{bCode}
+			,	#{strContents}
+			,	#{version}
+			,	GETDATE()
+			,	replace(NEWID(), '-', '') 
+			,	#{useYN}
+		)
+	</insert>
+	
+	
+		<!-- ================================
+		@name getPersonalInfo
+		@param idx
+		@result 
+		@author 김재형
+		@since 20.10.29
+		@description 개인정보처리 방침 상세 조회 페이지 - get PersonalInfo  
+	==================================== -->
+	<select id="getPersonalInfo" parameterType="int"  resultType="com.cms.dto.contents.contentsmanage.PersonalInfo">
+		SELECT 	idx
+		,		title
+		, 		bCode
+		,		strContents
+		, 		convert(varchar(16), insertdate, 120) AS insertdate
+		, 		pid
+		, 		version
+		, 		useYN
+		FROM BZPersonalInfo
+		WHERE idx = #{idx}
+	</select>
+	
+	
+		
+	<!-- ================================
+		@name modifyPersonalInfo
+		@param com.cms.dto.contents.PersonalInfo
+		@result 
+		@author 김재형
+		@since 20.10.29
+		@description 개인정보처리 방침 수정
+	==================================== -->
+	<update id="modifyPersonalInfo" parameterType="com.cms.dto.contents.contentsmanage.PersonalInfo">
+	
+		UPDATE BZPersonalInfo
+		SET 	title = #{title}
+			,	BCode = #{bCode}
+			,	strContents = #{strContents}
+			,	version = #{version}
+			,	useYN = #{useYN}
+		 WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+	@name removePersonalInfo
+	@param idx
+	@author 김재형
+	@since 20.11.09
+	@description 개인정보처리 방침 삭제
+	==================================== -->
+	<delete id="removePersonalInfo" parameterType="int" >
+		DELETE FROM BZPersonalInfo
+		WHERE IDX = #{idx}
+	</delete>
+	
+	
+</mapper>

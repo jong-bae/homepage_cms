@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.doctor.DoctorGlobalDao">
+
+	<!-- ================================
+		@name getGlobalList
+		@param Map
+		@result com.cms.dto.doctor.DoctorPart
+		@author JB
+		@since 21.11.08
+		@description get part List  
+	==================================== -->
+	<select id="getGlobalList" parameterType="map" resultType="com.cms.dto.doctor.Doctor">
+		SELECT 	idx as didx
+			,	Name as name
+			,	idno as idno
+			,	UseYn as useYN
+		FROM	[BZDoctor]
+		WHERE UseYN = 'Y'	
+			AND globalYn = 'Y'							
+		<choose>
+			<when test='flag.equals("global")'>
+				AND globalSeq &lt;&gt; 0
+				ORDER BY globalSeq ASC
+			</when>
+			<otherwise>
+				AND ruSeq &lt;&gt; 0
+				ORDER BY ruSeq ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- ================================
+		@name removeGlobalDoctor
+		@param int
+		@result 
+		@author JB
+		@since 21.11.11
+		@description remove global doctor  
+	==================================== -->
+	<update id="removeGlobalDoctor" parameterType="int">
+		UPDATE BZDoctor
+		SET globalYN = 'N'
+		WHERE idx = #{idx} 
+	</update>
+	
+	<!-- ================================
+		@name addGlobalDoctor
+		@param int
+		@result 
+		@author JB
+		@since 21.11.12
+		@description add global doctor  
+	==================================== -->
+	<update id="addGlobalDoctor" parameterType="int">
+		UPDATE BZDoctor
+		SET globalYN = 'Y'
+			,	globalSeq = 999
+			,	ruSeq = 999
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name sortGlobalList
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.11.12
+		@description Sort global doctor List  
+	==================================== -->
+	<update id="sortGlobalList" parameterType="com.cms.dto.doctor.DoctorPart">
+		UPDATE BZDoctor
+		SET globalSeq = #{orderValue}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name sortRuList
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.11.12
+		@description Sort global doctor List  
+	==================================== -->
+	<update id="sortRuList" parameterType="com.cms.dto.doctor.DoctorPart">
+		UPDATE BZDoctor
+		SET ruSeq = #{orderValue}
+		WHERE idx = #{idx}
+	</update>
+	
+</mapper>

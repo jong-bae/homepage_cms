@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.homepage.SeoDao">
+
+	<!-- ================================
+		@name getMetatagList
+		@param 
+		@result com.cms.dto.homepage.Seo
+		@author JB
+		@since 21.04.27
+		@description get Meta Tag List  
+	==================================== -->
+	<select id="getMetatagList" resultType="com.cms.dto.homepage.Seo">
+		SELECT	idx
+			,	url
+			,	title
+			,	description
+			,	UseYN as useYN
+		FROM [MetaDataPC]
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name setMetatag
+		@param com.cms.dto.homepage.Seo
+		@result 
+		@author JB
+		@since 21.04.28
+		@description set Meta Tag  
+	==================================== -->
+	<insert id="setMetatag" parameterType="com.cms.dto.homepage.Seo">
+		INSERT INTO MetaDataPC (
+				url
+			,	title
+			,	description
+			,	keywords
+			,	OGurl
+			,	OGimage
+			,	category1
+			,	category1_link
+			,	category2
+			,	category2_link
+			,	category3
+			,	category3_link
+			,	category4
+			,	category4_link
+			,	gubun
+			,	pageInfo
+			,	depth1
+			,	depth2
+			,	UseYN
+			,	modDate
+		) VALUES (
+				#{url}
+			,	#{title}
+			,	#{description}
+			,	#{keywords}
+			,	#{ogUrl}
+			,	#{ogImage}
+			,	#{category1}        
+			,	#{category1_link}   
+			,	#{category2}        
+			,	#{category2_link}   
+			,	#{category3}        
+			,	#{category3_link}   
+			,	#{category4}        
+			,	#{category4_link}
+			,	#{gubun}
+			,	#{pageInfo}
+			,	#{depth1}
+			,	#{depth2}
+			,	#{useYN}   
+			,	getdate()
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getMetadataOne
+		@param int
+		@result com.cms.dto.homepage.Seo
+		@author JB
+		@since 21.04.28
+		@description get Meta Tag one  
+	==================================== -->
+	<select id="getMetadataOne" parameterType="int" resultType="com.cms.dto.homepage.Seo">
+		SELECT	idx
+			,	url
+			,	title
+			,	description
+			,	keywords
+			,	OGurl
+			,	OGimage
+			,	gubun
+			,	pageInfo
+			,	depth1
+			,	depth2
+			,	category1
+			,	category1_link
+			,	category2
+			,	category2_link
+			,	category3
+			,	category3_link
+			,	category4
+			,	category4_link
+			,	UseYN
+		FROM MetaDataPC
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyMetadataOne
+		@param com.cms.dto.homepage.Seo
+		@result 
+		@author JB
+		@since 21.04.29
+		@description modify Meta Tag one  
+	==================================== -->
+	<update id="modifyMetadataOne" parameterType="com.cms.dto.homepage.Seo">
+		UPDATE MetaDataPC
+		SET		url = #{url}
+			,	title = #{title}
+			,	description = #{description}
+			,	keywords = #{keywords}
+			,	OGurl = #{ogUrl}
+			,	OGimage = #{ogImage}
+			,	gubun= #{gubun}
+			,	pageInfo = #{pageInfo}
+			,	depth1 = #{depth1}
+			,	depth2 = #{depth2}
+			,	category1 = #{category1}
+			,	category1_link = #{category1_link}
+			,	category2 = #{category2}
+			,	category2_link = #{category2_link}
+			,	category3 = #{category3}
+			,	category3_link = #{category3_link}
+			,	category4 = #{category4}
+			,	category4_link = #{category4_link}
+			,	UseYN = #{useYN}
+			,   modDate = getdate()
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name removeMetadataOne
+		@param int
+		@result 
+		@author JB
+		@since 21.04.29
+		@description remove Meta Tag one  
+	==================================== -->
+	<delete id="removeMetadataOne" parameterType="int">
+		DELETE FROM MetaDataPC
+		WHERE idx = #{idx}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.faq.FaqDao">
+
+	<!-- ================================
+		@name getFaqList
+		@param 
+		@result com.cms.dto.contents.faq.Faq
+		@author JB
+		@since 21.05.20
+		@description  get Faq List
+	==================================== -->
+	<select id="getFaqList" resultType="com.cms.dto.contents.faq.Faq">
+		SELECT	idx
+			,	Category
+			,	Hit
+			,	Subject
+			--,	Contents
+			,	BranchOpen
+			,	regDate
+			,	orderDate
+			,	UseYn
+		FROM Board_Faq
+		WHERE 1=1
+		ORDER BY idx desc
+	</select>
+	
+	<!-- ================================
+		@name setFaq
+		@param com.cms.dto.contents.faq.Faq
+		@result
+		@author JB
+		@since 21.05.21
+		@description  set Faq 
+		@comment - selectKey 태그를 전체로 감싼 이유 :
+					* MSSQL - SCOPE_IDENTITY() 를 쓸 경우 해당 프로세스의 해당 세션의 최종 IDENTITY 값을 추출한다. (정확성을 위함)
+					* SELECT SCOPE_IDENTITY() 구문에만 걸 경우 Mybatis에서 insert 쿼리와 다른 세션으로 수행하는 것으로 보임.
+						idx 값을 set 할 수 없다고 오류 남.
+					* IDENT_CURRENT('tableName') 으로 IDENTITY를 추출할 경우  추출할 SELECT 문에만 selectKey 걸어도 됨. (세션상관 없기 때문에 대신 정확성이 떨어짐 )
+	==================================== -->
+	<insert id="setFaq" parameterType="com.cms.dto.contents.faq.Faq">
+		INSERT INTO Board_Faq (
+				Category
+			,	Subject
+			,	Contents
+			,	BranchOpen
+		) VALUES (
+				#{category}
+			,	#{subject}
+			,	#{contents}
+			,	#{branchOpen}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getFaqOne
+		@param int
+		@result com.cms.dto.contents.faq.Faq
+		@author JB
+		@since 21.05.21
+		@description  get Faq One
+	==================================== -->
+	<select id="getFaqOne" parameterType="int" resultType="com.cms.dto.contents.faq.Faq">
+		SELECT	idx
+			,	Category
+			,	Hit
+			,	Subject
+			,	Contents
+			,	BranchOpen
+			,	RegDate
+			,	OrderDate
+			,	UseYn
+		FROM Board_Faq
+		WHERE idx = #{idx}
+		ORDER BY idx desc
+	</select>
+	
+	<!-- ================================
+		@name modifyFaqOne
+		@param com.cms.dto.contents.faq.Faq
+		@result 
+		@author JB
+		@since 21.05.24
+		@description modify Faq One
+	==================================== -->
+	<update id="modifyFaqOne" parameterType="com.cms.dto.contents.faq.Faq">
+		UPDATE Board_Faq
+		SET		UseYn = #{useYn}
+			,   Category = #{category}
+			,	Subject = #{subject}
+			,	Contents = #{contents}
+			,	BranchOpen = #{branchOpen}
+		WHERE idx = #{idx};
+	</update>
+	
+	<!-- ================================
+		@name removeFaq
+		@param int
+		@result 
+		@author JB
+		@since 21.05.24
+		@description remove Faq One
+	==================================== -->
+	<delete id="removeFaq" parameterType="int">
+		DELETE FROM Board_Faq
+		WHERE idx = #{idx};
+	</delete>
+
+</mapper>

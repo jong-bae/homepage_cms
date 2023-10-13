@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.homepage.MainpageCardDao">
+
+	<!-- ================================
+		@name getMainpageCardList
+		@param 
+		@result com.cms.dto.homepage.MainpageCard
+		@author JB
+		@since 20.12.10
+		@description get main card List 
+	==================================== -->
+	<select id="getMainpageCardList" resultType="com.cms.dto.homepage.MainpageCard">
+		SELECT 	Title as title
+			,	CONVERT(varchar(10), Start_Date, 121) as startDate
+			,	CONVERT(varchar(10), End_Date, 121) as endDate
+			,	Reg_Date as regDate
+			,	idx
+			,	Mobile_YN as mobile_yn
+		FROM [Mainpage_CardView]
+		ORDER BY Reg_Date DESC
+	</select>
+	
+	<!-- ================================
+		@name setMainpageCard
+		@param com.cms.dto.homepage.MainpageCard
+		@result 
+		@author JB
+		@since 20.12.14
+		@description set main card  
+	==================================== -->
+	<insert id="setMainpageCard" parameterType="com.cms.dto.homepage.MainpageCard">
+		INSERT INTO Mainpage_CardView (
+				Title
+			,	Start_Date
+			,	End_Date
+			,	Keyword1	,	Keyword_Link1	,	Keyword_Link1_Opt
+			,	Keyword2	,	Keyword_Link2	,	Keyword_Link2_Opt
+			,	Keyword3	,	Keyword_Link3	,	Keyword_Link3_Opt
+			,	Keyword4	,	Keyword_Link4	,	Keyword_Link4_Opt
+			,	Keyword_Order
+			,	Content_Title1	,	Content_Link1	,	Content_Link1_Opt	,	Content_Img1	,	Content_Order1
+			,	Content_Title2	,	Content_Link2	,	Content_Link2_Opt	,	Content_Img2	,	Content_Order2
+			,	Content_Title3	,	Content_Link3	,	Content_Link3_Opt	,	Content_Img3	,	Content_Order3
+			,	Content_Title4	,	Content_Link4	,	Content_Link4_Opt	,	Content_Img4	,	Content_Order4
+			,	Reg_Date
+			,	Reg_ID
+			,	Mobile_YN
+		) VALUES (
+				#{title}
+			,	CONVERT(DATETIME, #{startDate})
+			<choose>
+				<when test="endDate == ''">
+					,	NULL
+				</when>
+				<otherwise>
+					,	CONVERT(DATETIME, #{endDate})
+				</otherwise>
+			</choose>
+			,	#{keyword1}	,	#{keywordLink1}	,	#{keywordLink1_opt}
+			,	#{keyword2}	,	#{keywordLink2}	,	#{keywordLink2_opt}
+			,	#{keyword3}	,	#{keywordLink3}	,	#{keywordLink3_opt}
+			,	#{keyword4}	,	#{keywordLink4}	,	#{keywordLink4_opt}
+			,	#{keywordOrder}
+			,	#{contentTitle1}	,	#{contentLink1}	,	#{contentLink1_opt}	,	#{contentImg1}	,	#{contentOrder1}
+			,	#{contentTitle2}	,	#{contentLink2}	,	#{contentLink2_opt}	,	#{contentImg2}	,	#{contentOrder2}
+			,	#{contentTitle3}	,	#{contentLink3}	,	#{contentLink3_opt}	,	#{contentImg3}	,	#{contentOrder3}
+			,	#{contentTitle4}	,	#{contentLink4}	,	#{contentLink4_opt}	,	#{contentImg4}	,	#{contentOrder4}
+			,	GETDATE()
+			,	#{regID}
+			,	#{mobile_yn}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getMainpageCard
+		@param int
+		@result com.cms.dto.homepage.MainpageCard
+		@author JB
+		@since 20.12.15
+		@description get main card 
+	==================================== -->
+	<select id="getMainpageCard" parameterType="int" resultType="com.cms.dto.homepage.MainpageCard">
+		SELECT 	idx
+			,	Title as title
+			,	Start_Date as startDate
+			,	End_Date as endDate
+			,	Keyword1 as keyword1
+			,	Keyword_Link1 as keywordLink1
+			,	Keyword_Link1_Opt as keywordLink1_opt
+			,	Keyword2 as keyword2
+			,	Keyword_Link2 as keywordLink2
+			,	Keyword_Link2_Opt as keywordLink2_opt
+			,	Keyword3 as keyword3
+			,	Keyword_Link3 as keywordLink3
+			,	Keyword_Link3_Opt as keywordLink3_opt
+			,	Keyword4 as keyword4
+			,	Keyword_Link4 as keywordLink4
+			,	Keyword_Link4_Opt as keywordLink4_opt
+			,	Keyword_Order as keywordOrder
+			,	Content_Title1 as contentTitle1
+			,	Content_Link1 as contentLink1
+			,	Content_Link1_Opt as contentLink1_opt
+			,	Content_Img1 as contentImg1_origin
+			,	Content_Order1 as contentOrder1
+			,	Content_Title2 as contentTitle2
+			,	Content_Link2 as contentLink2
+			,	Content_Link2_Opt as contentLink2_opt
+			,	Content_Img2 as contentImg2_origin
+			,	Content_Order2 as contentOrder2
+			,	Content_Title3 as contentTitle3
+			,	Content_Link3 as contentLink3
+			,	Content_Link3_Opt as contentLink3_opt
+			,	Content_Img3 as contentImg3_origin
+			,	Content_Order3 as contentOrder3
+			,	Content_Title4 as contentTitle4
+			,	Content_Link4 as contentLink4
+			,	Content_Link4_Opt as contentLink4_opt
+			,	Content_Img4 as contentImg4_origin
+			,	Content_Order4 as contentOrder4
+			,	Mobile_YN as mobile_yn
+		FROM Mainpage_CardView
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyMainpageCard
+		@param com.cms.dto.homepage.MainpageCard
+		@result 
+		@author JB
+		@since 20.12.16
+		@description modify main card 
+	==================================== -->
+	<update id="modifyMainpageCard" parameterType="com.cms.dto.homepage.MainpageCard">
+		UPDATE Mainpage_CardView
+		SET 	Title = #{title}
+			,	Start_Date = #{startDate}
+			<choose>
+				<when test="endDate == ''">
+					,	End_Date = NULL
+				</when>
+				<otherwise>
+					,	End_Date = #{endDate}
+				</otherwise>
+			</choose>
+			,	Keyword1 = #{keyword1}
+			,	Keyword_Link1 = #{keywordLink1}
+			,	Keyword_Link1_Opt = #{keywordLink1_opt}
+			,	Keyword2 = #{keyword2}
+			,	Keyword_Link2 = #{keywordLink2}
+			,	Keyword_Link2_Opt = #{keywordLink2_opt}
+			,	Keyword3 = #{keyword3}
+			,	Keyword_Link3 = #{keywordLink3}
+			,	Keyword_Link3_Opt = #{keywordLink3_opt}	
+			,	Keyword4 = #{keyword4}
+			,	Keyword_Link4 = #{keywordLink4}
+			,	Keyword_Link4_Opt = #{keywordLink4_opt}	
+			,	Keyword_Order = #{keywordOrder}
+			,	Content_Title1 = #{contentTitle1}
+			,	Content_Link1 = #{contentLink1}
+			,	Content_Link1_Opt = #{contentLink1_opt}
+			,	Content_Img1 = #{contentImg1}
+			,	Content_Order1 = #{contentOrder1}
+			,	Content_Title2 = #{contentTitle2}
+			,	Content_Link2 = #{contentLink2}
+			,	Content_Link2_Opt = #{contentLink2_opt}
+			,	Content_Img2 = #{contentImg2}
+			,	Content_Order2 = #{contentOrder2}
+			,	Content_Title3 = #{contentTitle3}
+			,	Content_Link3 = #{contentLink3}
+			,	Content_Link3_Opt = #{contentLink3_opt}
+			,	Content_Img3 = #{contentImg3}
+			,	Content_Order3 = #{contentOrder3}
+			,	Content_Title4 = #{contentTitle4}
+			,	Content_Link4 = #{contentLink4}
+			,	Content_Link4_Opt = #{contentLink4_opt}
+			,	Content_Img4 = #{contentImg4}
+			,	Content_Order4 = #{contentOrder4}
+			,	Mod_Date = GETDATE()
+			,	Mod_ID = #{modID}
+			,	Mobile_YN = #{mobile_yn}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name deleteMainpageCard
+		@param int
+		@result 
+		@author JB
+		@since 20.12.21
+		@description delete main card 
+	==================================== -->
+	<delete id="removeMainpageCard" parameterType="int">
+		DELETE FROM Mainpage_CardView
+		WHERE idx = #{idx}
+	</delete>
+</mapper>

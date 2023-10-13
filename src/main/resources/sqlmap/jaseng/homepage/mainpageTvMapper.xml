@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.homepage.MainpageTvDao">
+	
+	<!-- ================================
+		@name getInterestList
+		@param 
+		@result com.cms.dto.homepage.MainpageKeyword
+		@author JB
+		@since 20.12.02
+		@description get Interest Title List 
+	==================================== -->
+	<select id="getInterestList" resultType="com.cms.dto.homepage.MainpageKeyword">
+		SELECT DISTINCT TITLE as interestTitle
+		FROM [JASENG_TV_INTEREST]
+		WHERE gubun IN ('관심질환', '관심분야')
+	</select>
+	
+	<!-- ================================
+		@name modifyInterestKeyword
+		@param com.cms.dto.homepage.MainpageKeyword
+		@result 
+		@author JB
+		@since 20.12.03
+		@description set InterestKeyword 
+	==================================== -->
+	<update id="modifyInterestKeyword" parameterType="com.cms.dto.homepage.MainpageKeyword">
+		IF EXISTS (
+			SELECT * FROM Mainpage_Jaseng_TV
+		)
+			BEGIN
+				UPDATE Mainpage_Jaseng_TV
+				SET 	Interest_Title = #{interestTitle} 
+					,	Keyword_Name = #{keywordName}
+					,	Mod_ID = #{modId}
+					,	Mod_Date = GETDATE()
+			END
+		ELSE
+			BEGIN
+				INSERT INTO Mainpage_Jaseng_TV (
+					Interest_Title
+				,	Keyword_Name
+				,	Mod_ID
+				,	Mod_Date
+				) VALUES (
+						#{interestTitle}
+					,	#{keywordName}
+					,	#{modId}
+					,	GETDATE()
+				) 
+			END
+	</update>
+	
+	<!-- ================================
+		@name getInterestKeyword
+		@param 
+		@result	com.cms.dto.homepage.MainpageKeyword
+		@author JB
+		@since 20.12.04
+		@description get InterestKeyword 
+	==================================== -->
+	<select id="getInterestKeyword" resultType="com.cms.dto.homepage.MainpageKeyword">
+		SELECT	Interest_Title as interestTitle
+			,	Keyword_Name as keywordName
+		FROM Mainpage_Jaseng_TV
+	</select>
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.common.LoginDao">
+
+	<!-- ================================
+		@name getLoginUserInfo
+		@param com.cms.dto.master.Admin
+		@result com.cms.dto.master.Admin
+		@author JB
+		@since 21.04.09
+		@description get LoginUser info  
+	==================================== -->
+	<select id="getLoginUserInfo" parameterType="com.cms.dto.master.Admin" resultType="com.cms.dto.master.Admin">
+		SELECT 	ID as id
+			,	Name as name
+			,	BCode as bCode
+			,	Auth as auth
+			,	Use_YN as use_yn
+		FROM Admin_Manage
+		WHERE ID = #{id}
+			AND Password = dbo.encrypt_sha256(#{password})
+	</select>
+	
+	<!-- ================================
+		@name getUserCnt
+		@param map
+		@result com.cms.dto.master.Admin
+		@author JB
+		@since 21.11.02
+		@description get User COUNT  
+	==================================== -->
+	<select id="getUserInfo" parameterType="map" resultType="com.cms.dto.master.Admin">
+		SELECT ID as id
+			,	Name as name
+			,	Email as email
+		FROM Admin_Manage
+		WHERE ID = #{id}
+	</select>
+	
+	<!-- ================================
+		@name modifyPassword
+		@param map
+		@result
+		@author JB
+		@since 21.11.02
+		@description modify password  
+	==================================== -->
+	<update id="modifyPassword" parameterType="map">
+		UPDATE Admin_Manage
+		SET Password = dbo.encrypt_sha256(#{password})
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="modifyPassword2" parameterType="com.cms.dto.master.Admin">
+		UPDATE Admin_Manage
+		SET Password = dbo.encrypt_sha256(#{password})
+		WHERE ID = #{id}
+	</update>
+	
+	<!-- ================================
+		@name getPasswordCheck
+		@param Admin
+		@result int
+		@author JB
+		@since 21.11.03
+		@description get PasswordCheck  
+	==================================== -->
+	<select id="getPasswordCheck" parameterType="com.cms.dto.master.Admin" resultType="int">
+		SELECT COUNT(*) as Cnt
+		FROM Admin_Manage
+		WHERE ID = #{id} 
+			AND Password = dbo.encrypt_sha256(#{password_origin})
+	</select>
+	
+	<!-- ================================
+		@name modifyLastLoginDate
+		@param String
+		@author JB
+		@since 22.06.17
+		@description update last login date  
+	==================================== -->
+	<update id="modifyLastLoginDate" parameterType="String">
+		UPDATE [Admin_Manage]
+		SET LastLogin_Date = getdate()
+		WHERE ID = #{id}
+	</update>
+	
+</mapper>

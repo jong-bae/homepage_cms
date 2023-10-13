@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.doctor.DoctorPartDao">
+
+	<!-- ================================
+		@name getPartList
+		@param int
+		@result com.cms.dto.doctor.DoctorPart
+		@author JB
+		@since 21.02.24
+		@description get part List  
+	==================================== -->
+	<select id="getPartList" parameterType="int" resultType="com.cms.dto.doctor.DoctorPart">
+		SELECT 	idx
+			,	gubun1_idx
+			,	gubun2_name
+		FROM	BZDoctor_SiteOrder_Gubun2
+		WHERE	gubun1_idx = #{idx}
+		ORDER BY gubun2_order ASC
+	</select>
+	
+	<!-- ================================
+		@name getDoctorList
+		@param int
+		@result com.cms.dto.doctor.DoctorPart
+		@author JB
+		@since 21.02.24
+		@description get  List  
+	==================================== -->
+	<select id="getDoctorList" parameterType="int"  resultType="com.cms.dto.doctor.DoctorPart">
+		SELECT 	T1.idx
+			,	T2.name
+			,	T2.useyn as useYN
+			,	T2.idx as didx
+			,	T1.d_order 
+		FROM bzdoctor_siteorder_detail T1 
+			INNER JOIN bzdoctor T2 ON T1.bzdoctor_idx = T2.idx 
+		WHERE gubun2_idx = #{idx}
+		ORDER BY d_order ASC
+	</select>
+	
+	<!-- ================================
+		@name setPart
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.03.10
+		@description set Part  
+	==================================== -->
+	<insert id="setPart" parameterType="com.cms.dto.doctor.DoctorPart">
+		INSERT INTO	 [BZDoctor_SiteOrder_Gubun2] (
+				gubun1_idx
+			,	gubun2_name
+			,	gubun2_order
+		) VALUES (
+				#{gubun1_idx}
+			,	#{gubun2_name}
+			,	#{gubun2_order}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getPartCount
+		@param int
+		@result int
+		@author JB
+		@since 21.03.10
+		@description get part count  
+	==================================== -->
+	<select id="getPartCount" parameterType="int" resultType="int">
+		SELECT COUNT(*) as orderCnt
+		FROM BZDoctor_SiteOrder_Gubun2
+		WHERE gubun1_idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name getPartOne
+		@param int
+		@result com.cms.dto.doctor.DoctorPart
+		@author JB
+		@since 21.03.12
+		@description get part One  
+	==================================== -->
+	<select id="getPartOne" parameterType="int" resultType="com.cms.dto.doctor.DoctorPart">
+		SELECT gubun2_name
+			,	idx
+		FROM BZDoctor_SiteOrder_Gubun2
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyPart
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.03.12
+		@description modify Part  
+	==================================== -->
+	<update id="modifyPart" parameterType="com.cms.dto.doctor.DoctorPart">
+		UPDATE BZDoctor_SiteOrder_Gubun2
+		SET	gubun2_name = #{gubun2_name}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name removePart
+		@param int
+		@result 
+		@author JB
+		@since 21.03.12
+		@description remove Part  
+	==================================== -->
+	<delete id="removePart" parameterType="int">
+		DELETE FROM BZDoctor_SiteOrder_Gubun2
+		WHERE idx = #{idx}
+	</delete>
+	
+	<!-- ================================
+		@name removeDoctor
+		@param int
+		@result 
+		@author JB
+		@since 21.03.12
+		@description remove Doctor
+	==================================== -->
+	<delete id="removeDoctor" parameterType="int">
+		DELETE FROM BZDoctor_SiteOrder_Detail
+		WHERE idx = #{idx}
+	</delete>
+	
+	<!-- ================================
+		@name modifyPartOrder
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.03.17
+		@description modify part order
+	==================================== -->
+	<update id="modifyPartOrder" parameterType="com.cms.dto.doctor.DoctorPart">
+		UPDATE [BZDoctor_SiteOrder_Gubun2]
+		SET gubun2_order = #{orderValue}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name modifyDoctorOrder
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.03.17
+		@description modify Doctor order
+	==================================== -->
+	<update id="modifyDoctorOrder" parameterType="com.cms.dto.doctor.DoctorPart">
+		UPDATE [BZDoctor_SiteOrder_Detail]
+		SET D_Order = #{orderValue}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name getDoctorSearchList
+		@param String
+		@result com.cms.dto.doctor.Doctor
+		@author JB
+		@since 21.03.18
+		@description get Doctor Search List
+	==================================== -->
+	<select id="getDoctorSearchList" parameterType="String"  resultType="com.cms.dto.doctor.Doctor">
+		SELECT DISTINCT 
+				T5.idx as didx
+			,	T5.name
+			,	T5.useYN
+			,	T5.idno
+			,	T5.newidno
+			,	T5.detailYN
+			,	T5.scheduleYN
+			,	ISNULL(T6.B_NAME+' 한방병원','') as branchName
+		FROM BZDoctor T5 LEFT OUTER JOIN (
+				SELECT T4.idx as gubun2_idx
+					,	T3.bzDoctor_idx
+					,	T4.B_IDX
+					,	T4.B_NAME
+					,	T4.gubun2_name 
+				FROM BZDoctor_SiteOrder_Detail T3 INNER JOIN (
+						SELECT 	T2.idx
+							,	T1.B_IDX
+							,	T1.B_NAME
+							,	T2.gubun2_name 
+						FROM NT_BRANCH T1 INNER JOIN BZDoctor_SiteOrder_Gubun2 T2 
+											ON T1.B_IDX = T2.gubun1_idx
+				) T4 
+				ON T3.gubun2_idx = T4.idx
+		) T6 
+		ON T5.idx= T6.bzdoctor_idx
+		WHERE T5.UseYN = 'Y'
+			AND Name like '%' + #{param} + '%'
+		ORDER BY T5.idx ASC
+	</select>
+	
+	<!-- ================================
+		@name setDoctor
+		@param com.cms.dto.doctor.DoctorPart
+		@result 
+		@author JB
+		@since 21.03.19
+		@description set Doctor
+	==================================== -->
+	<insert id="setDoctor" parameterType="com.cms.dto.doctor.DoctorPart">
+		INSERT INTO [BZDoctor_SiteOrder_Detail] (
+				gubun2_idx
+			,	BzDoctor_idx
+			,	D_Order	
+		) VALUES (
+				#{gubun2_idx}
+			,	#{didx}
+			,	#{d_order}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getDoctorCount
+		@param int
+		@result int
+		@author JB
+		@since 21.03.10
+		@description get doctor count  
+	==================================== -->
+	<select id="getDoctorCount" parameterType="int" resultType="int">
+		SELECT COUNT(*) as orderCnt
+		FROM [BZDoctor_SiteOrder_Detail]
+		WHERE gubun2_idx = #{idx}
+	</select>
+</mapper>

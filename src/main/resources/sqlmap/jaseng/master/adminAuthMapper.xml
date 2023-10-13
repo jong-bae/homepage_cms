@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.master.AdminAuthDao">
+
+	<!-- ================================
+		@name setAdminAuth
+		@param com.cms.dto.master.AdminAuthDao
+		@result 
+		@author JB
+		@since 20.10.06
+		@description set AdminAuth  
+	==================================== -->
+	<insert id="setAdminAuth" parameterType="com.cms.dto.master.AdminMenuAuth">
+		INSERT INTO Admin_MenuAuth (
+				ID
+			,	Menu_IDX
+		) VALUES (
+				#{id}
+			,	#{menuIdx}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getAdminAuth
+		@param String
+		@result int
+		@author JB
+		@since 20.10.14
+		@description get AdminAuth  
+	==================================== -->
+	<select id="getAdminAuth" parameterType="String" resultType="int">
+		SELECT Menu_IDX FROM Admin_MenuAuth WHERE ID = #{id}
+	</select>
+	
+	<!-- ================================
+		@name removeAdminAuth
+		@param String
+		@author JB
+		@since 20.10.14
+		@description remove AdminAuth  
+	==================================== -->
+	<delete id="removeAdminAuth" parameterType="String">
+		DELETE FROM Admin_MenuAuth WHERE ID = #{id}
+	</delete>
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.EventDao">
+
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.contents.contentsmanage.Event
+		@result 
+		@author 김재형
+		@since 20.11.11
+		@description 이벤트 관리 조회 - get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.contents.contentsmanage.Event">
+			
+		SELECT	[DOC_ID] as docID
+		,		[EVT_SUBJECT] as evtSubject
+		,		[EVT_STATE] as evtState
+		,		[EVT_USE_YN] as evtUseYN
+		,		[EVT_START_DT] as evtStartDT
+		,		[EVT_END_DT] as evtEndDT
+		,		[EVT_IMG_URL] as evtImgUrl
+		FROM [dbo].[T_EVENT]
+		ORDER BY docID desc
+	</select>
+	
+
+	<!-- ================================
+		@name setBranch
+		@param com.cms.dto.contents.contentsmanage.Event
+		@result 
+		@author 김재형
+		@since 20.11.11
+		@description setEvent 
+	==================================== -->
+	<insert id="setEvent" parameterType="com.cms.dto.contents.contentsmanage.Event">
+		INSERT INTO [dbo].[T_EVENT] (
+			[EVT_SUBJECT]
+	    ,	[EVT_STATE]
+	    ,	[EVT_USE_YN]
+	    ,	[EVT_START_DT]
+	    ,	[EVT_END_DT]
+	    ,	[EVT_IMG_URL]
+	    ,	[EVT_LINK_TYPE]
+		,	[EVT_LINK_URL]
+	    ,	[EVT_POP_OPT]
+        ,	[CREATE_DATE]
+        , 	[READ_CNT]
+	  	,	[EVT_DESC]
+	    )VALUES (
+	    	#{evtSubject}
+	    ,	#{evtState}
+        ,	#{evtUseYN}
+      	,	replace(#{evtStartDT},'-', '')
+	    ,	replace(#{evtEndDT},'-', '')
+	    ,	#{evtImgUrl}
+       	, 	#{evtLinkType}
+		,	#{evtLinkUrl}
+        ,	#{evtPopOpt}
+        , 	GETDATE()
+        , 	0
+        , 	#{evtDesc}
+        )
+	</insert>
+	
+	<!-- ================================
+		@name getEvent
+		@param docID
+		@result 
+		@author 김재형
+		@since 20.11.16
+		@description 이벤트 상세 조회 페이지   
+	==================================== -->
+	<select id="getEvent" parameterType="int"  resultType="com.cms.dto.contents.contentsmanage.Event">
+		SELECT 	doc_ID AS docID
+		,	[EVT_SUBJECT] AS evtSubject
+	    ,	[EVT_STATE] AS evtState
+	    ,	[EVT_USE_YN] AS evtUseYN
+		,	CONVERT(CHAR(10), CONVERT(DATETIME,[EVT_START_DT]), 23)  AS evtStartDT
+	    ,	CONVERT(CHAR(10), CONVERT(DATETIME,[EVT_END_DT]), 23)  AS evtEndDT
+	    ,	[EVT_IMG_URL] AS evtImgUrl
+	    ,	[EVT_LINK_TYPE] AS evtLinkType
+		,	[EVT_LINK_URL] AS evtLinkUrl
+	    ,	[EVT_POP_OPT] AS evtPopOpt
+        ,	[CREATE_DATE] AS createDate
+        , 	[READ_CNT] AS readCnt
+	  	,	[EVT_DESC] AS evtDesc
+		FROM [dbo].[T_EVENT]
+		WHERE DOC_ID = #{docID}
+	</select>	
+	
+	<!-- ================================
+	@name modifyEvent
+	@param com.cms.dto.contents.contentsmanage.Event
+	@result 
+	@author 김재형
+	@since 20.11.17.
+	@description 이벤트  수정
+	==================================== -->
+	<update id="modifyEvent" parameterType="com.cms.dto.contents.contentsmanage.Event">
+		UPDATE [dbo].[T_EVENT]
+		SET [EVT_SUBJECT] = #{evtSubject}
+	    ,	[EVT_STATE] = #{evtState}
+	    ,	[EVT_USE_YN] = #{evtUseYN}
+	    ,	[EVT_START_DT] = replace(#{evtStartDT},'-', '')
+	    ,	[EVT_END_DT] = replace(#{evtEndDT},'-', '')
+	    ,	[EVT_IMG_URL] = #{evtImgUrl}
+	    ,	[EVT_LINK_TYPE] = #{evtLinkType}
+		,	[EVT_LINK_URL] = #{evtLinkUrl}
+	    ,	[EVT_POP_OPT] = #{evtPopOpt}
+	  	,	[EVT_DESC] = #{evtDesc}
+	  	WHERE [doc_ID] = #{docID}
+	</update>
+
+
+	
+	<!-- ================================
+	@name removeEvent
+	@param docID
+	@author 김재형
+	@since 20.11.17.
+	@description 이벤트 삭제
+	==================================== -->
+	<delete id="removeEvent" parameterType="int" >
+		DELETE FROM [T_EVENT]
+		WHERE doc_ID = #{docID}
+	</delete>
+
+</mapper>

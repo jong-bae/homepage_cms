@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.homepage.TreatmentTimeDao">
+
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.homepage.TreatmentTime
+		@result 
+		@author 김재형
+		@since 20.12.15
+		@description get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.homepage.TreatmentTime">
+		SELECT [Idx] as idx
+		      ,[BCode] as bCode
+		      ,(SELECT B_NAME FROM NT_BRANCH WHERE B_IDX = [BCode]) as bName
+		      ,[Mon_Start] as monStart
+		      ,[Mon_End]  as monEnd
+		      ,[Tue_Start] as tueStart
+		      ,[Tue_End] as tueEnd
+		      ,[Wed_Start] as wedStart
+		      ,[Wed_End] as wedEnd
+		      ,[Thu_Start] as thuStart
+		      ,[Thu_End] as thuEnd
+		      ,[Fri_Start] as friStart
+		      ,[Fri_End] as friEnd
+		      ,[Sat_Start] as satStart
+		      ,[Sat_End] as satEnd
+		      ,[Sun_Start] as sunStart
+		      ,[Sun_End] as sunEnd
+		      ,[HoliDay_Start] as holidayStart
+		      ,[HoliDay_End] as holidayEnd
+		      ,[Lunch_Start] as lunchStart
+		      ,[Lunch_End] as lunchEnd
+		      ,[ClosedList] as closedList
+		      ,[LastUpdateAdmin] as lastUpdateAdmin
+		      ,[LastUpdateDate] as lastUpdateDate
+		  FROM [dbo].[TreatmentTime_Base]
+		  ORDER BY bCode ASC
+	</select>
+	
+	<!-- ================================
+	@name setTreatmentTime
+	@param com.cms.dto.homepage.TreatmentTime
+	@result 
+	@author 김재형
+	@since 20.12.15
+	@description 
+	==================================== -->
+	<insert id="setTreatmentTime" parameterType="com.cms.dto.homepage.TreatmentTime">
+		
+		INSERT INTO TreatmentTime_Base( 
+				  [BCode]
+				, [Mon_Start]
+				, [Mon_End]
+				, [Tue_Start]
+				, [Tue_End]
+				, [Wed_Start]
+				, [Wed_End]
+				, [Thu_Start]
+				, [Thu_End]
+				, [Fri_Start]
+				, [Fri_End]
+				, [Sat_Start]
+				, [Sat_End]
+				, [Sun_Start]
+				, [Sun_End]
+				, [HoliDay_Start]
+				, [HoliDay_End]
+				, [Lunch_Start]
+				, [Lunch_End]
+				, [ClosedList]
+				, [LastUpdateAdmin]
+				, [LastUpdateDate] )
+		VALUES ( 
+				  #{bCode}
+				, #{monStart}
+				, #{monEnd}
+				, #{tueStart}
+				, #{tueEnd}
+				, #{wedStart}
+				, #{wedEnd}
+				, #{thuStart}
+				, #{thuEnd}
+				, #{friStart}
+				, #{friEnd}
+				, #{satStart}
+				, #{satEnd}
+				, #{sunStart}
+				, #{sunEnd}
+				, #{holidayStart}
+				, #{holidayEnd}
+				, #{lunchStart}
+				, #{lunchEnd}
+				, #{closedList}
+				, #{lastUpdateAdmin}
+				, GETDATE()
+		)				   
+	</insert>
+	
+	
+	<!-- ================================
+	@name checkBCode
+	@param String bCode
+	@result 
+	@author 김재형
+	@since 20.12.15
+	@description  checkBCode
+	==================================== -->
+	<select id="checkBCode" parameterType="String" resultType="int">
+		SELECT COUNT(idx) AS cnt
+		FROM [dbo].[TreatmentTime_Base]
+		WHERE BCode = #{bCode}
+	</select>
+
+
+
+	<!-- ================================
+	@name getTreatmentTime
+	@param int idx
+	@result 
+	@author 김재형
+	@since 20.12.16
+	@description  getTreatmentTime
+	==================================== -->
+	<select id="getTreatmentTime" parameterType="int" resultType="com.cms.dto.homepage.TreatmentTime">
+		SELECT	Idx AS idx 
+		,		BCode AS bCode
+		,		(SELECT B_Name FROM dbo.NT_BRANCH where b_idx = bcode) AS bName
+		,		[Mon_Start] AS monStart
+		,		[Mon_End] AS monEnd
+		,		[Tue_Start] AS tueStart
+		,		[Tue_End] AS tueEnd
+		,		[Wed_Start] AS wedStart
+		,		[Wed_End] AS wedEnd
+		,		[Thu_Start] AS thuStart
+		,		[Thu_End] AS thuEnd
+		,		[Fri_Start] AS friStart
+		,		[Fri_End] AS friEnd
+		,		[Sat_Start] AS satStart
+		,		[Sat_End] AS satEnd
+		,		[Sun_Start] AS sunStart
+		,		[Sun_End] AS sunEnd
+		,		[HoliDay_Start] AS holidayStart
+		,		[HoliDay_End] AS holidayEnd
+		,		[Lunch_Start] AS lunchStart
+		,		[Lunch_End] AS lunchEnd
+		,		[ClosedList] AS closedList
+		,		[LastUpdateAdmin] AS lastUpdateAdmin
+		,		 CONVERT(CHAR(19), LastUpdateDate, 120) AS lastUpdateDate
+		FROM [dbo].[TreatmentTime_Base]
+		WHERE Idx = #{idx}
+	</select>
+
+
+	<!-- ================================
+		@name modifyTreatmentTime
+		@param com.cms.dto.homepage.TreatmentTime
+		@result 
+		@author 김재형
+		@since 20.12.16
+		@description modifyTreatmentTime
+	==================================== -->
+	<update id="modifyTreatmentTime" parameterType="com.cms.dto.homepage.TreatmentTime">
+		UPDATE [dbo].[TreatmentTime_Base]
+		SET 	[Mon_Start] = #{monStart}
+		,		[Mon_End] = #{monEnd}
+		,		[Tue_Start] = #{tueStart}
+		,		[Tue_End] = #{tueEnd}
+		,		[Wed_Start] = #{wedStart}
+		,		[Wed_End] = #{wedEnd}
+		,		[Thu_Start] = #{thuStart}
+		,		[Thu_End] = #{thuEnd}
+		,		[Fri_Start] = #{friStart}
+		,		[Fri_End] = #{friEnd}
+		,		[Sat_Start] = #{satStart}
+		,		[Sat_End] = #{satEnd}
+		,		[Sun_Start] = #{sunStart}
+		,		[Sun_End] = #{sunEnd}
+		,		[HoliDay_Start] = #{holidayStart}
+		,		[HoliDay_End] = #{holidayEnd}
+		,		[Lunch_Start] = #{lunchStart}
+		,		[Lunch_End] = #{lunchEnd}
+		,		[ClosedList] = #{closedList}
+		WHERE idx = #{idx}
+	</update>
+
+
+	<!-- ================================
+		@name getExceptionList
+		@param com.cms.dto.homepage.TreatmentTime
+		@result 
+		@author 김재형
+		@since 20.12.17
+		@description get List  
+	==================================== -->
+	<select id="getExceptionList" resultType="com.cms.dto.homepage.TreatmentTime">
+		SELECT [Idx] as idx
+		      ,[BCode] as bCode
+		      ,[BName] as bName
+		      , CONVERT(CHAR(10), TargetDate, 23) AS targetDate
+		      ,[Contents]  as contents
+		      ,[LastUpdateAdmin] as lastUpdateAdmin
+		      ,[LastUpdateDate] as lastUpdateDate
+		  FROM [dbo].[TreatmentTime_Exception]
+		  ORDER BY targetDate DESC
+	</select>
+	
+	
+	
+	
+	<!-- ================================
+	@name setTreatmentTimeException
+	@param com.cms.dto.homepage.TreatmentTime
+	@result 
+	@author 김재형
+	@since 20.12.17
+	@description 
+	==================================== -->
+	<insert id="setTreatmentTimeException" parameterType="com.cms.dto.homepage.TreatmentTime">
+		INSERT INTO [dbo].[TreatmentTime_Exception] (
+				 [BCode]			
+				,[BName]	
+				,[TargetDate]			
+				,[Contents]			
+				,[LastUpdateAdmin]		
+				,[LastUpdateDate]
+		) VALUES ( 
+				 #{bCode}
+			    ,#{bName}
+				,#{targetDate}
+				,#{contents}
+				,#{lastUpdateAdmin}
+			 	,GETDATE()
+		)
+	</insert>
+
+
+	<!-- ================================
+		@name modifyTreatmentTimeException
+		@param com.cms.dto.homepage.TreatmentTime
+		@result 
+		@author 김재형
+		@since 20.12.17
+		@description modifyTreatmentTimeException
+	==================================== -->
+	<update id="modifyTreatmentTimeException" parameterType="com.cms.dto.homepage.TreatmentTime">
+		UPDATE [dbo].[TreatmentTime_Exception]
+		SET 	[BCode] = #{bCode}
+		, 		[BName] = #{bName}
+		,		[TargetDate] = #{targetDate}
+		,		[Contents] = #{contents}
+		,		[LastUpdateAdmin] = #{lastUpdateAdmin}
+		,		[LastUpdateDate] = GETDATE()
+		WHERE idx = #{idx}
+	</update>
+	
+	
+	<!-- ================================
+	@name getTreatmentTimeException
+	@param int idx
+	@result 
+	@author 김재형
+	@since 20.12.17
+	@description  getTreatmentTimeException
+	==================================== -->
+	<select id="getTreatmentTimeException" parameterType="int" resultType="com.cms.dto.homepage.TreatmentTime">
+		SELECT	Idx AS idx 
+		,		BCode AS bCode
+		,		BName AS bName
+		, 		CONVERT(CHAR(10), TargetDate, 23) AS targetDate
+		,		[Contents] AS contents
+		,		[LastUpdateAdmin] AS lastUpdateAdmin
+		,		 CONVERT(CHAR(19), LastUpdateDate, 120) AS lastUpdateDate
+		FROM [dbo].[TreatmentTime_Exception]
+		WHERE Idx = #{idx}
+	</select>
+	
+	
+		
+	<!-- ================================
+	@name removeTreatmentTimeException
+	@param idx
+	@author 김재형
+	@since 20.12.18.
+	@description 예외처리 날짜 삭제
+	==================================== -->
+	<delete id="removeTreatmentTimeException" parameterType="int" >
+		DELETE FROM [TreatmentTime_Exception]
+		WHERE idx = #{idx}
+	</delete>
+
+</mapper>

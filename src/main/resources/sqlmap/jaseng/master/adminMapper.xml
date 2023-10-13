@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.master.AdminDao">
+
+	<!-- ================================
+		@name setAdmin
+		@param com.cms.dto.master.Admin
+		@result 
+		@author JB
+		@since 20.10.05
+		@description set Admin  
+	==================================== -->
+	<insert id="setAdmin" parameterType="com.cms.dto.master.Admin">
+		INSERT INTO Admin_Manage (
+				ID
+			,	Password
+			,	Name
+			,	BCode
+			,	Dept
+			,	Email
+			,	Auth
+			,	Use_YN
+			,	Reg_Date
+			,	Reg_ID
+		) VALUES (
+				#{id}
+			,	dbo.encrypt_sha256(#{password})
+			,	#{name}
+			,	#{bCode}
+			,	#{dept}
+			,	#{email}
+			,	#{auth}
+			,	#{use_yn}
+			,	GETDATE()
+			,	#{regId}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getAdminList
+		@param com.cms.dto.master.Admin
+		@result 
+		@author JB
+		@since 20.10.05
+		@description get Admin List  
+	==================================== -->
+	<select id="getAdminList" resultType="com.cms.dto.master.Admin">
+		SELECT idx
+			,	ID as id
+			,	Name as name
+			,	BCode as bCode
+			,	(SELECT B_NAME FROM NT_BRANCH WHERE B_IDX = BCode) as bName
+			,	Dept as dept
+			,	Auth as auth
+			,	Use_YN as use_yn
+			,	Reg_Date as regDate
+			,	LastLogin_Date as lastLoginDate
+		FROM Admin_Manage
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name getCurrentAdmin
+		@param int
+		@result com.cms.dto.master.Admin
+		@author JB
+		@since 20.10.13
+		@description get Admin  
+	==================================== -->
+	<select id="getCurrentAdmin" parameterType="int" resultType="com.cms.dto.master.Admin">
+		SELECT idx
+			,	ID as id
+			,	Name as name
+			,	BCode as bCode
+			,	Dept as dept
+			,	Email as email
+			,	Auth as auth
+			,	Use_YN as use_yn
+		FROM Admin_Manage
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyAdmin
+		@param com.cms.dto.master.Admin
+		@author JB
+		@since 20.10.14
+		@description modify admin  
+	==================================== -->
+	<update id="modifyAdmin" parameterType="com.cms.dto.master.Admin">
+		UPDATE Admin_Manage
+		SET		ID = #{id}
+			,	Name = #{name}
+			,	BCode = #{bCode}
+			,	Dept = #{dept}
+			,	Email = #{email}
+			,	Auth = #{auth}
+			,	Use_YN = #{use_yn}
+			,	Mod_ID = #{modId}
+			,	Mod_Date = GETDATE()
+			<if test="password != ''">
+				,	Password = dbo.encrypt_sha256(#{password})
+			</if>
+		WHERE idx = #{idx}
+	</update>
+</mapper>

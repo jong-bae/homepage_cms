@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.contents.tvbony.TvbonyDao">
+	
+	<select id="getList" resultType="com.cms.dto.contents.tvbony.Tvbony">
+		SELECT 	IDX as idx,				
+		 		CATEGORY1 as category1,  
+		 		CATEGORY2 as category2,  
+		 		VID as vid,   
+		 		BRANCH as branch,   
+		 		TITLE as title,
+		 		REGDATE as regdate,   
+		 		REAL_YN as real_yn,  
+		 		MAIN_YN as main_yn,  
+		 		MMAIN_YN as mmain_yn,
+				PUBLIC_YN as public_yn,
+		 		VID_TIME as vid_time,   
+		 		MAIN_MODDATE as main_moddate, 
+		 		MMAIN_MODDATE as mmain_moddate,
+				PUBLIC_MODDATE as public_moddate
+		FROM JASENG_TV 
+		ORDER BY idx DESC
+	</select>	
+	
+	<select id="getTvbony" parameterType="int"  resultType="com.cms.dto.contents.tvbony.Tvbony">
+		SELECT 	IDX as idx,		
+				CATEGORY1 as category1,  
+		 		CATEGORY2 as category2,		 		
+		 		VID as vid,   
+		 		BRANCH as branch,   
+		 		TITLE as title,
+		 		DESCRIPTION as description, 
+		 		HASHTAG as hashtag,
+		 		VIEW_COUNT as view_count,
+		 		NAME_DR as name_dr,
+		 		DIDX as didx,
+		 		INTEREST_DISEASE as interest_disease,
+		 		INTEREST_DEPART as interest_depart,		 		
+		 		REGDATE as regdate,   
+		 		REAL_YN as real_yn,  
+		 		MAIN_YN as main_yn,  
+		 		MMAIN_YN as mmain_yn,
+				PUBLIC_YN as public_yn,
+		 		VID_TIME as vid_time,   
+		 		MAIN_MODDATE as main_moddate, 
+		 		MMAIN_MODDATE as mmain_moddate,
+				PUBLIC_MODDATE as public_moddate
+		FROM JASENG_TV
+		WHERE idx = #{idx}
+	</select>
+	
+	<select id="getTvCodeList" resultType="com.cms.dto.contents.tvbony.TvCode">
+		SELECT 
+			GUBUN as gubun, 	
+			( case 
+				when GUBUN = '치료영상'		then '1' 
+				when GUBUN = ' 치료법'		then '2'
+				when GUBUN = '닥터Q&amp;A'	then '3' 
+				when GUBUN = ' 척추체조'		then '4'
+				when GUBUN = ' 건강정보'		then '5'
+				when GUBUN = ' 소식'		then '6'
+				else '7' end ) as order_num		
+		FROM ( 
+			select 
+				GUBUN 
+			from JASENG_TV_INTEREST 
+			where 
+				GUBUN not in ( '관심분야', '관심질환' ) 
+			group by GUBUN 
+		) T 
+		ORDER BY ORDER_NUM ASC
+	</select>
+	
+	<select id="getTvCodeCategoryList" parameterType="String" resultType="com.cms.dto.contents.tvbony.TvCode">
+		SELECT 
+			TITLE as title
+		FROM JASENG_TV_INTEREST 
+		WHERE 
+			GUBUN = #{gubun}
+		ORDER BY TITLE ASC
+	</select>
+	
+	<select id="getTvCodeInterestList" parameterType="String" resultType="com.cms.dto.contents.tvbony.TvCode">
+		SELECT 
+				title
+		FROM ( 
+			select GUBUN, TITLE
+			from JASENG_TV_INTEREST 
+			where 
+			GUBUN in ( #{gubun} ) 
+			group by GUBUN, TITLE
+		) T 
+		ORDER BY TITLE ASC
+	</select>
+	
+	<!-- ================================
+		@name setTvbony
+		@param com.cms.dto.contents.tvbony.Tvbony
+		@result 
+		@author JB
+		@since 22.07.19
+		@description set TV bony
+		@comment 메인동영상 (MMAIN_YN) 사용 등록시 그 외 나머지 값들 전부 N 으로 치환
+	==================================== -->
+	<insert id="setTvbony" parameterType="com.cms.dto.contents.tvbony.Tvbony">
+		<selectKey keyProperty="idx" resultType="int" order="AFTER">
+		INSERT INTO JASENG_TV (
+				[CATEGORY1]
+		    ,	[CATEGORY2]
+		    ,	[VID]
+		    ,	[VID_TIME]
+		    ,	[BRANCH]
+		    ,	[TITLE]
+		    ,	[DESCRIPTION]
+		    ,	[DIDX]
+		    ,	[INTEREST_DISEASE]
+		    ,	[INTEREST_DEPART]
+		    ,	[REAL_YN]
+		    ,	[MAIN_YN]
+		    ,	[MMAIN_YN]
+			,	[PUBLIC_YN]
+		) VALUES (
+				#{category1}
+			,	#{category2}
+			,	#{vid}
+			,	#{vid_time}
+			,	#{branch}
+			,	#{title}
+			,	#{description}
+			,	#{didx}
+			,	#{interest_disease}
+			,	#{interest_depart}
+			,	#{real_yn}
+			,	#{main_yn}
+			,	#{mmain_yn}
+			,	#{public_yn}
+		)
+		SELECT SCOPE_IDENTITY() as idx
+		</selectKey>
+		
+		<if test='mmain_yn == "Y"'>
+			UPDATE JASENG_TV
+			SET MMAIN_YN = 'N'
+			WHERE IDX &lt;&gt; #{idx}
+		</if>
+	</insert>
+	
+	<!-- ================================
+		@name modifyTvbony
+		@param com.cms.dto.contents.tvbony.Tvbony
+		@result 
+		@author JB
+		@since 22.07.19
+		@description modify TV bony
+	==================================== -->
+	<update id="modifyTvbony" parameterType="com.cms.dto.contents.tvbony.Tvbony">
+		UPDATE JASENG_TV
+		SET		[CATEGORY1] = #{category1}       
+			,	[CATEGORY2] = #{category2}      
+			,	[VID]       = #{vid}      
+			,	[VID_TIME]  = #{vid_time}      
+			,	[BRANCH]    = #{branch}      
+			,	[TITLE]     = #{title}      
+			,	[DESCRIPTION] = #{description}    
+			,	[DIDX]      = #{didx}      
+			,	[INTEREST_DISEASE] = #{interest_disease}
+			,	[INTEREST_DEPART] = #{interest_depart} 
+			,	[REAL_YN]   = #{real_yn}      
+			,	[MAIN_YN]   = #{main_yn}
+			<if test='main_yn == "Y"'>
+				,   [MAIN_MODDATE] = GETDATE()
+			</if>
+			,	[MMAIN_YN]  = #{mmain_yn}
+			<if test='mmain_yn == "Y"'>
+				,	[MMAIN_MODDATE] = GETDATE()
+			</if>
+			,	[PUBLIC_YN]  = #{public_yn}
+			,	[PUBLIC_MODDATE] = GETDATE()
+		WHERE IDX = #{idx}
+		
+		<if test='mmain_yn == "Y"'>
+			UPDATE JASENG_TV
+			SET MMAIN_YN = 'N'
+			WHERE IDX &lt;&gt; #{idx}
+		</if>
+	</update>
+	
+	<!-- ================================
+		@name getTvbonyTopList
+		@param 
+		@result com.cms.dto.contents.tvbony.Tvbony
+		@author JB
+		@since 22.07.19
+		@description get TV bony 12 List
+	==================================== -->
+	<select id="getTvbonyTopList" resultType="int">
+		SELECT TOP 12 IDX as idx
+		FROM JASENG_TV
+		WHERE MAIN_YN = 'Y' 
+		ORDER BY MAIN_MODDATE DESC
+	</select>
+	
+	<!-- ================================
+		@name modifyTvbonyMainYN
+		@param 
+		@result 
+		@author JB
+		@since 22.07.19
+		@description modify TV bony MainYN
+	==================================== -->
+	<update id="modifyTvbonyMainYN" >
+		UPDATE JASENG_TV
+		SET MAIN_YN = 'N'
+		WHERE IDX not in
+			<foreach collection="list" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+	</update>
+	
+	<!-- ================================
+		@name removeTvbonyOne
+		@param INTEGER
+		@result 
+		@author JB
+		@since 22.07.20
+		@description remove TV bony 
+	==================================== -->
+	<delete id="removeTvbony" parameterType="int">
+		DELETE FROM JASENG_TV
+		WHERE IDX = #{idx}
+	</delete>
+	
+</mapper>

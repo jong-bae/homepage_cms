@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.common.CommonDao">
+
+	<!-- ================================
+		@name getBCodeSelectBox
+		@param 
+		@result com.cms.dto.common.JasengBranchCode
+		@author JB
+		@since 20.10.05
+		@description BranchCode selectbox Data  
+	==================================== -->
+	<select id="getBCodeSelectBox" resultType="com.cms.dto.common.JasengBranchCode">
+		SELECT B_IDX as bCode
+			,	B_NAME as bName
+			,	B_HOSPITAL as bHospital
+		FROM NT_BRANCH
+		WHERE B_STATUS = 'Y'
+			and B_IDX &lt;&gt; 10018
+		ORDER BY B_ORDER asc
+	</select>
+	
+	<select id="getBranchName" parameterType="hashmap" resultType="com.cms.dto.common.JasengBranchCode">
+		SELECT B_NAME as bName
+		FROM NT_BRANCH
+		WHERE B_IDX IN 
+			<foreach collection="bcode" item="arr" open="(" close=")" separator=",">
+				#{arr}
+			</foreach>
+	</select>
+	
+	<!-- ================================
+		@name getBranchList
+		@param 
+		@result com.cms.dto.common.JasengBranchCode
+		@author JB
+		@since 21.02.23
+		@description get branch List  
+	==================================== -->
+	<select id="getBranchList" resultType="com.cms.dto.common.JasengBranchCode">
+		SELECT 	B_IDX as bCode
+			, B_NAME as bName
+		FROM NT_BRANCH 
+		WHERE	B_STATUS='Y' 
+			AND B_IDX != 10000 
+		ORDER BY B_ORDER ASC	
+	</select>
+	
+	<!-- ================================
+		@name getBranchEnName
+		@param int
+		@result String
+		@author JB
+		@since 21.08.31
+		@description get branch EN Name  
+	==================================== -->
+	<select id="getBranchEnName" parameterType="String" resultType="String">
+		SELECT B_FOLDER as bFolder
+		FROM NT_BRANCH
+		WHERE B_IDX = ${value}
+	</select>
+	
+	<!-- ================================
+		@name getNPaymentCodeList
+		@param com.cms.dto.common.BZCode
+		@result com.cms.dto.common.BZCode
+		@author JB
+		@since 21.06.4
+		@description get paymentCode List  
+	==================================== -->
+	<select id="getNPaymentCodeList" parameterType="String" resultType="com.cms.dto.common.BZCode">
+		SELECT 	Code as code
+			,	Exp as exp
+		FROM [BZCode]
+		<where>
+			<choose>
+				<when test="value != null and value != ''">
+					Parent_Code = #{value}
+				</when>
+				<otherwise>
+					Parent_Code = 'CD_NPAYMENT'
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<!-- ================================
+		@name getDoctorSelectBox
+		@param 
+		@result com.cms.dto.doctor.Doctor
+		@author JB
+		@since 22.07.18
+		@description get Doctor List  
+	==================================== -->
+	<select id="getDoctorSelectBox" resultType="com.cms.dto.doctor.Doctor">
+		SELECT 	idx as didx
+			,	Name as name
+		FROM BZDoctor
+		WHERE UseYN = 'Y'
+		ORDER BY Name ASC
+	</select>
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.contents.tvbony.TvcodeDao">
+	
+	<!-- ================================
+		@name getTvcodeList
+		@param 
+		@result com.cms.dto.contents.tvbony.TvCode
+		@author JB
+		@since 22.06.20
+		@description  get TVCODE List
+	==================================== -->
+	<select id="getTvcodeList" resultType="com.cms.dto.contents.tvbony.TvCode">
+		SELECT IDX as idx
+			,	GUBUN as gubun
+			,	TITLE as title
+			,	REGDATE as regdate
+			,	REAL_YN as real_yn
+		FROM [JASENG_TV_INTEREST] 
+		ORDER BY idx DESC
+	</select>	
+	
+	<!-- ================================
+		@name setTvcode
+		@param com.cms.dto.contents.tvbony.TvCode
+		@result 
+		@author JB
+		@since 22.06.21
+		@description  set TVCODE 
+	==================================== -->
+	<insert id="setTvcode" parameterType="com.cms.dto.contents.tvbony.TvCode">
+		INSERT INTO JASENG_TV_INTEREST (
+				GUBUN
+			,	TITLE
+			,	REAL_YN
+		) VALUES (
+				#{gubun}
+			,	#{title}
+			,	#{real_yn}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getTvcodeOne
+		@param int
+		@result com.cms.dto.contents.tvbony.TvCode
+		@author JB
+		@since 22.06.21
+		@description  get TVCODE 
+	==================================== -->
+	<select id="getTvcodeOne" parameterType="int" resultType="com.cms.dto.contents.tvbony.TvCode">
+		SELECT	IDX as idx
+			,	GUBUN as gubun
+			,	TITLE as title
+			,	REAL_YN as real_yn
+		FROM JASENG_TV_INTEREST
+		WHERE IDX = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyTvcode
+		@param com.cms.dto.contents.tvbony.TvCode
+		@result 
+		@author JB
+		@since 22.06.21
+		@description  update TVCODE 
+	==================================== -->
+	<update id="modifyTvcode" parameterType="com.cms.dto.contents.tvbony.TvCode">
+		UPDATE JASENG_TV_INTEREST
+		SET 	GUBUN = #{gubun}
+			,	TITLE  = #{title}
+			,	REAL_YN = #{real_yn}
+		WHERE IDX = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name getTvCodeCheck
+		@param map
+		@result int
+		@author JB
+		@since 22.06.22
+		@description  get TVCODE check
+	==================================== -->
+	<select id="getTvcodeCheck" parameterType="map" resultType="int">
+		SELECT	count(*)
+		FROM	JASENG_TV_INTEREST
+		WHERE TITLE = #{title}
+			AND GUBUN = #{gubun}
+	</select>
+	
+</mapper>

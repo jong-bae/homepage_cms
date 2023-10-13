@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.AgreementDao">
+
+	<!-- ================================
+		@name getAgreementList
+		@param 
+		@result com.cms.dto.contents.contentsmanage.Agreement
+		@author JB
+		@since 21.05.04
+		@description  get Agreement List
+	==================================== -->
+	<select id="getAgreementList" resultType="com.cms.dto.contents.contentsmanage.Agreement">
+		SELECT 	pid
+			,	title
+			,	strContents
+			,	version
+			,	insertDate
+			,	useYN
+		FROM [BZAgreement]
+		ORDER BY insertDate desc
+	</select>
+	
+	<!-- ================================
+		@name setAgreement
+		@param com.cms.dto.contents.contentsmanage.Agreement
+		@result 
+		@author JB
+		@since 21.05.06
+		@description  set Agreement 
+	==================================== -->
+	<insert id="setAgreement" parameterType="com.cms.dto.contents.contentsmanage.Agreement">
+		INSERT INTO BZAgreement (
+				title
+			,	strContents
+			,	version
+			,	useYN
+			,	pid
+			,	insertDate
+		) VALUES (
+				#{title}
+			,	#{strContents}
+			,	#{version}
+			,	#{useYN}
+			,	#{pid}
+			,	GETDATE()
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getAgreementOne
+		@param String
+		@result com.cms.dto.contents.contentsmanage.Agreement
+		@author JB
+		@since 21.05.07
+		@description  get Agreement One 
+	==================================== -->
+	<select id="getAgreementOne" parameterType="String" resultType="com.cms.dto.contents.contentsmanage.Agreement">
+		SELECT 	title
+			,	strContents
+			,	version
+			,	useYN
+			,	pid
+		FROM BZAgreement
+		WHERE pid = #{pid}
+	</select>
+	
+	<!-- ================================
+		@name modifyAgreement
+		@param com.cms.dto.contents.contentsmanage.Agreement
+		@result  
+		@author JB
+		@since 21.05.07
+		@description  modify Agreement One 
+	==================================== -->
+	<update id="modifyAgreement" parameterType="com.cms.dto.contents.contentsmanage.Agreement">
+		UPDATE BZAgreement
+		SET		title = #{title}
+			,	strContents = #{strContents}
+			,	version = #{version}
+			,	useYN = #{useYN}
+		WHERE pid = #{pid}
+	</update>
+	
+	<!-- ================================
+		@name removeAgreement
+		@param String
+		@result  
+		@author JB
+		@since 21.05.07
+		@description  delete Agreement One 
+	==================================== -->
+	<delete id="removeAgreement" parameterType="String">
+		DELETE FROM BZAgreement
+		WHERE pid = #{pid}
+	</delete>
+
+</mapper>

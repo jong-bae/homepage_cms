@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cms.dao.homepage.PopupDao">
+
+	<!-- ================================
+		@name getPopupList
+		@param 
+		@result com.cms.dto.homepage.Popup
+		@author JB
+		@since 20.10.15
+		@description get branch List  
+	==================================== -->
+	<select id="getPopupList_pc" resultType="com.cms.dto.homepage.Popup">
+		SELECT 	idx
+			,	SiteCode as bCode
+			,	Title as title
+			,	StartDate as startDate
+			,	EndDate as endDate
+			,	UseYN as useYN
+			,	PopYN as popCode
+			,	(SELECT B_NAME FROM NT_BRANCH WHERE B_IDX = SiteCode) as bName
+		FROM BZPopup
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name getPopupList_mobile
+		@param 
+		@result com.cms.dto.homepage.Popup
+		@author JB
+		@since 20.11.06
+		@description get branch List  
+	==================================== -->
+	<select id="getPopupList_m" resultType="com.cms.dto.homepage.Popup">
+		SELECT 	idx
+			,	BCodeList as bCodeList
+			,	Exposure as exposure
+			,	Title as title
+			,	CONVERT(varchar(10), Start_Date, 121) as startDate
+			,	CONVERT(varchar(10), End_Date, 121) as endDate
+			,	Use_YN as useYN
+			,	Reg_Date as regDate
+		FROM Mainpage_Popup_M
+		ORDER BY idx DESC
+	</select>
+	
+	<!-- ================================
+		@name setPopup_mobile
+		@param com.cms.dto.homepage.Popup
+		@author JB
+		@since 20.11.05
+		@description set popup mobile
+	==================================== -->
+	<insert id="setPopup_mobile" parameterType="com.cms.dto.homepage.Popup">
+		INSERT INTO [Mainpage_Popup_M] (
+				BCodeList
+			,	Exposure
+			,	Title
+			,	Description
+			,	Popup_Img
+			,	URL
+			,	URL_Option
+			<if test="urlYN != null">
+				,	URL_YN
+			</if>
+			,	USE_YN
+			,	[Order]
+			,	Start_Date
+			,	End_Date
+			,	Reg_Date
+			,	Reg_ID
+		) VALUES (
+				#{bCode}
+			,	#{exposure}	
+			,	#{title}
+			,	#{description}
+			,	#{popupImg}
+			,	#{url}
+			,	#{url_Option}
+			<if test="urlYN != null">
+				,	#{urlYN}
+			</if>
+			,	#{useYN}
+			,	#{order}
+			,	CONVERT(DATETIME, #{startDate})
+			<choose>
+				<when test="endDate == ''">
+					,	NULL
+				</when>
+				<otherwise>
+					,	CONVERT(DATETIME, #{endDate})
+				</otherwise>
+			</choose>
+			,	GETDATE()
+			,	#{regID}
+		)
+	</insert>
+	
+	<!-- ================================
+		@name getPopup_mobile
+		@param int
+		@result com.cms.dto.homepage.Popup
+		@author JB
+		@since 20.11.10
+		@description get popup mobile
+	==================================== -->
+	<select id="getPopup_mobile" parameterType="int" resultType="com.cms.dto.homepage.Popup">
+		SELECT	idx			
+			,	BCodeList as bCodeList
+			,	Exposure as exposure
+			,	Title as title
+			,	Description as description
+			,	Popup_Img as popupImg_origin
+			,	URL as url
+			,	URL_Option as url_Option
+			,	URL_YN as urlYN
+			,	USE_YN as useYN
+			,	[Order] as [order]
+			,	CONVERT(varchar(10), Start_Date, 121) as startDate
+			,	CONVERT(varchar(10), End_Date, 121) as endDate
+		FROM [Mainpage_Popup_M]
+		WHERE idx = #{idx}
+	</select>
+	
+	<!-- ================================
+		@name modifyPopup_mobile
+		@param com.cms.dto.homepage.Popup
+		@author JB
+		@since 20.11.12
+		@description modify popup mobile
+	==================================== -->
+	<update id="modifyPopup_mobile" parameterType="com.cms.dto.homepage.Popup">
+		UPDATE Mainpage_Popup_M
+		SET		BCodeList = #{bCode}
+			,	Exposure = #{exposure}			
+			,	Title = #{title}
+			,	Description = #{description}
+			,	Popup_Img = #{popupImg}
+			,	URL = #{url}
+			,	URL_Option = #{url_Option}
+			,	URL_YN = #{urlYN}
+			,	USE_YN = #{useYN}
+			,	[Order] = #{order}
+			,	Start_Date = CONVERT(DATETIME, #{startDate})
+			<choose>
+				<when test="endDate == ''">
+					,	End_Date = NULL
+				</when>
+				<otherwise>
+					,	End_Date = CONVERT(DATETIME, #{endDate})
+				</otherwise>
+			</choose>
+			,	Mod_Date = GETDATE()
+			,	Mod_ID = #{modID}
+		WHERE idx = #{idx}
+	</update>
+	
+	<!-- ================================
+		@name removePopup_mobile
+		@param int
+		@author JB
+		@since 20.12.21
+		@description delete popup mobile
+	==================================== -->
+	<delete id="removePopup_mobile" parameterType="int">
+		DELETE FROM Mainpage_Popup_M
+		WHERE idx = #{idx}
+	</delete>
+</mapper>

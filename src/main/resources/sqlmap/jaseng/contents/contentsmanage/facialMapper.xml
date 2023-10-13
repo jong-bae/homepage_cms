@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.FacialDao">
+
+	<!-- ================================
+		@name getFacialList
+		@param 
+		@result com.cms.dto.common.BZBoard
+		@author 박종배
+		@since 21.10.07
+		@description 안면신경마비 조회
+	==================================== -->
+	<select id="getFacialList" resultType="com.cms.dto.common.BZBoard">
+		SELECT A.[intSeq]
+		      ,A.[intRead]
+		      , CONVERT(CHAR(10), A.[dateRegdate], 23) AS [dateRegdate]
+		      ,A.[strName]
+			  ,LEFT( CONVERT(VARCHAR(MAX),A.[strSubject]), 25) AS [strSubject]
+		      ,A.[strFirstImg]
+		      ,A.[idx]
+			  ,B.B_NAME AS bName
+		      ,A.[mriDoctorName]
+		FROM [dbo].[BZBoard] AS A
+		LEFT OUTER JOIN [dbo].[NT_BRANCH] AS B
+		ON A.[CD_BCODE] = B.B_IDX
+		WHERE intBoardID = 112
+	</select>
+	
+	
+	<!-- ================================
+		@name setFacial
+		@param com.cms.dto.common.BZBoard
+		@result 
+		@author 박종배
+		@since 21.10.18
+		@description setFacial 
+	==================================== -->
+	<select id="setFacial" parameterType="com.cms.dto.common.BZBoard" statementType="CALLABLE" >
+	
+		{
+			CALL USPBZB_Put_Content_20110110 (
+				112,
+				0,
+				0,
+				'',
+				#{strID,mode=IN,jdbcType=VARCHAR},
+				#{strName,mode=IN,jdbcType=VARCHAR},  
+				'',
+				'',
+				#{strSubject,mode=IN,jdbcType=VARCHAR},  
+				#{strPreContent,mode=IN,jdbcType=VARCHAR},  
+				#{strContent,mode=IN,jdbcType=VARCHAR},
+				'',  
+				1,  
+				#{strMImage,mode=IN,jdbcType=VARCHAR},  
+				500, 
+				'',
+				'0000000000',
+				'0000000000',
+				'',
+				#{intErrorCheck,mode=OUT,jdbcType=INTEGER },
+				#{intThread,mode=OUT,jdbcType=INTEGER },
+				#{cdBCODE,mode=IN,jdbcType=VARCHAR},
+				'',
+				'',
+				#{disease,mode=IN,jdbcType=VARCHAR},    
+				#{mriDoctorName,mode=IN,jdbcType=VARCHAR}
+			)
+
+		}
+		
+	</select>
+	
+	<!-- ================================
+		@name setFileName
+		@param com.cms.dto.common.BZBoard
+		@result 
+		@author 박종배
+		@since 21.10.18
+		@description setFileName 
+	==================================== -->
+	<select id="setFileName" parameterType="com.cms.dto.common.BZBoard" statementType="CALLABLE" >
+		{
+			CALL USPBZB_Put_First_File (
+				112,
+				#{intThread,mode=IN,jdbcType=VARCHAR},
+				#{strFirstImg,mode=IN,jdbcType=VARCHAR},
+				#{intErrorCheck,mode=OUT,jdbcType=INTEGER }
+			)
+		}
+		
+	</select>
+	
+	<!-- ================================
+		@name "getFacial"
+		@param 
+		@result com.cms.dto.common.BZBoard
+		@author 박종배
+		@since 21.10.18
+		@description getFacial 
+	==================================== -->
+	<select id="getFacial" resultType="com.cms.dto.common.BZBoard">
+		SELECT 	idx
+		,		intSeq
+		, 		dateRegdate
+		, 		strSubject
+		,		strPreContent
+		, 		strContent
+		, 		strFirstImg
+		, 		strMImage
+		, 		CD_BCODE AS cdBCODE
+		, 		disease
+		, 		mriDoctorName
+		,		bitDelete
+		FROM [dbo].[BZBoard]
+		WHERE idx = #{idx} AND intBoardID = 112
+	</select>
+	
+	
+	<!-- ================================
+	@name removeFacial
+	@param idx
+	@author 박종배
+	@since 21.10.19.
+	@description  안면신경마비 치료후기 삭제
+	==================================== -->
+	<delete id="removeFacial" parameterType="int" >
+		DELETE FROM [dbo].[BZBoard]
+		WHERE idx = #{idx} AND intBoardID = 112
+	</delete>
+	
+		
+	<!-- ================================
+	@name modifyMri
+	@param com.cms.dto.common.BZBoard
+	@result 
+	@author 박종배
+	@since 21.10.19.
+	@description 안면신경마비  수정
+	==================================== -->
+	<update id="modifyFacial" parameterType="com.cms.dto.common.BZBoard">
+		UPDATE [dbo].[BZBoard]
+		SET	strSubject = #{strSubject}
+		,		cd_bcode = #{cdBCODE}
+		,		disease = #{disease}
+		,		mriDoctorName = #{mriDoctorName}
+		,		strMImage = #{strMImage}
+		,		strContent = #{strContent}
+		,		strFirstImg = #{strFirstImg}
+		,		bitDelete = #{bitDelete}
+		WHERE idx = #{idx} AND intBoardID = 112
+	</update>
+	
+</mapper>

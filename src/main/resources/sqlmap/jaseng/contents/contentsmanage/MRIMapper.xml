@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.cms.dao.contents.contentsmanage.MRIDao">
+
+	<!-- ================================
+		@name getList
+		@param com.cms.dto.contents.contentsmanage.Event
+		@result 
+		@author 김재형
+		@since 21.01.27
+		@description MRI 관리 조회 - get List  
+	==================================== -->
+	<select id="getList" resultType="com.cms.dto.common.BZBoard">
+			
+		SELECT A.[intSeq]
+		      ,A.[intRead]
+		      , CONVERT(CHAR(10), A.[dateRegdate], 23) AS [dateRegdate]
+		      ,A.[strName]
+			  ,LEFT( CONVERT(VARCHAR(MAX),A.[strSubject]), 25) AS [strSubject]
+		      ,A.[strFirstImg]
+		      ,A.[idx]
+			  ,B.B_NAME AS bName
+		      ,A.[mriDoctorName]
+		FROM [dbo].[BZBoard] AS A
+		LEFT OUTER JOIN [dbo].[NT_BRANCH] AS B
+		ON A.[CD_BCODE] = B.B_IDX
+		WHERE intBoardID = 16
+				
+	</select>
+	
+	
+	<!-- ================================
+		@name setMri
+		@param com.cms.dto.common.BZBoard
+		@result 
+		@author 김재형
+		@since 21.02.01
+		@description setMri 
+	==================================== -->
+	<select id="setMri" parameterType="com.cms.dto.common.BZBoard" statementType="CALLABLE" >
+	
+		{
+			CALL USPBZB_Put_Content_20110110 (
+				16,
+				0,
+				0,
+				'',
+				#{strID,mode=IN,jdbcType=VARCHAR},
+				#{strName,mode=IN,jdbcType=VARCHAR},  
+				'',
+				'',
+				#{strSubject,mode=IN,jdbcType=VARCHAR},  
+				#{strPreContent,mode=IN,jdbcType=VARCHAR},  
+				#{strContent,mode=IN,jdbcType=VARCHAR},
+				'',  
+				1,  
+				#{strMImage,mode=IN,jdbcType=VARCHAR},  
+				500, 
+				'',
+				'0000000000',
+				'0000000000',
+				'',
+				#{intErrorCheck,mode=OUT,jdbcType=INTEGER },
+				#{intThread,mode=OUT,jdbcType=INTEGER },
+				#{cdBCODE,mode=IN,jdbcType=VARCHAR},
+				#{care_sdate,mode=IN,jdbcType=VARCHAR},    
+				#{care_edate,mode=IN,jdbcType=VARCHAR},    
+				#{disease,mode=IN,jdbcType=VARCHAR},    
+				#{mriDoctorName,mode=IN,jdbcType=VARCHAR}
+			)
+
+		}
+		
+	</select>
+	
+	<!-- ================================
+		@name setMri
+		@param com.cms.dto.common.BZBoard
+		@result 
+		@author 김재형
+		@since 21.02.05
+		@description setFileName 
+	==================================== -->
+	<select id="setFileName" parameterType="com.cms.dto.common.BZBoard" statementType="CALLABLE" >
+	
+		{
+			CALL USPBZB_Put_First_File (
+				16,
+				#{intThread,mode=IN,jdbcType=VARCHAR},
+				#{strFirstImg,mode=IN,jdbcType=VARCHAR},
+				#{intErrorCheck,mode=OUT,jdbcType=INTEGER }
+			)
+
+		}
+		
+	</select>
+	
+	
+	<select id="getMRI" resultType="com.cms.dto.common.BZBoard">
+		
+		SELECT 	idx
+		,		intSeq
+		, 		dateRegdate
+		, 		strSubject
+		,		strPreContent
+		, 		strContent
+		, 		strFirstImg
+		, 		strMImage
+		, 		CD_BCODE AS cdBCODE
+		, 		care_sdate
+		, 		care_edate
+		, 		disease
+		, 		mriDoctorName
+		,		bitDelete
+		FROM [dbo].[BZBoard]
+		WHERE idx = #{idx} AND intBoardID = 16
+	</select>
+	
+	
+	<!-- ================================
+	@name removeMri
+	@param idx
+	@author 김재형
+	@since 21.03.15.
+	@description  MRI 치료후기 삭제
+	==================================== -->
+	<delete id="removeMri" parameterType="int" >
+		DELETE FROM [dbo].[BZBoard]
+		WHERE idx = #{idx} AND intBoardID = 16
+	</delete>
+	
+		
+	<!-- ================================
+	@name modifyMri
+	@param com.cms.dto.common.BZBoard
+	@result 
+	@author 김재형
+	@since 20.11.09.
+	@description MRI  수정
+	==================================== -->
+	<update id="modifyMri" parameterType="com.cms.dto.common.BZBoard">
+	
+		UPDATE [dbo].[BZBoard]
+		SET	strSubject = #{strSubject}
+		,		care_sdate = #{care_sdate}
+		,		care_edate = #{care_edate}
+		,		cd_bcode = #{cdBCODE}
+		,		disease = #{disease}
+		,		mriDoctorName = #{mriDoctorName}
+		,		strMImage = #{strMImage}
+		,		strContent = #{strContent}
+		,		strFirstImg = #{strFirstImg}
+		,		bitDelete = #{bitDelete}
+		WHERE idx = #{idx} AND intBoardID = 16
+	</update>
+	
+	
+	
+</mapper>
